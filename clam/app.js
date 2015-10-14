@@ -59,20 +59,7 @@ app.use(function(err, req, res, next) {
 });
 
 var server = http.createServer(app);
-
-var io = require('socket.io')(server);
-
-io.on('connection', function(socket){
-  console.log('user connected');
-
-  socket.on('chat message', function(data){
-    console.log(data);
-  })
-
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
-});
+require('./routes/server')(server);
 
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
