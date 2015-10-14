@@ -1,11 +1,10 @@
 var express = require('express');
-var http = require('http');
+var http = require('http')
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var io = require('socket.io')('http');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -59,11 +58,23 @@ app.use(function(err, req, res, next) {
   });
 });
 
+var server = http.createServer(app);
+
+var io = require('socket.io')(server);
+
 io.on('connection', function(socket){
-  console.log('a user connected');
+  console.log('user connected');
+
+  socket.on('chat message', function(data){
+    console.log(data);
+  })
+
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
 });
 
-http.createServer(app).listen(app.get('port'), function(){
+server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
