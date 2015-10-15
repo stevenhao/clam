@@ -40,6 +40,7 @@ module.exports = function(server){
 
     socket.on('chat message', function(data){
       console.log(data);
+      socket.emit('cat response', ['yo', 'wass', 'up']);
     })
 
     socket.on('disconnect', function(){
