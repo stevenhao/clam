@@ -32,7 +32,7 @@ window.onload = function() {
 
   console.log('done');
 
-  var listenTo = ['chat response', 'cat response', 'other events'];
+  var listenTo = ['connection', 'register error', 'register success', 'chat response', 'pid error', 'pid success', 'guess error', 'guess success', 'flip error', 'flip success', 'pass error', 'pass success'];
   makeHandler = function(event) {
     return function(data) {
       receiveMessage(event, data);

@@ -7,17 +7,30 @@ module.exports = function(server){
   var sockets = fillArray(null, num_players);
 
   io.on('connection', function(socket){
-    console.log('user connected');
     var pid = null;
+    socket.emit('connection', 'user connected');
 
     socket.on('pid', function(id){
+      if(isNaN(id)){
+        socket.emit('register error', 'invalid input');
+        return;
+      }
+
+      if(pid != null){
+        socket.emit('register error', 'socket already registered');
+        return;
+      }
       // register socket with player id
       if(id >= num_players) // checks that id is valid
         socket.emit('register error', 'invalid id');
       else{
         sockets[id] = socket;
         pid = id;
-        update_player('register success', pid);
+        socket.emit('register success', {
+          'game_info':game_info, 
+          'public':public_gs, 
+          'private':private_gs['cards'][id]
+        });
       }
     });
 
@@ -26,6 +39,12 @@ module.exports = function(server){
       if(pid == null){
         // checks that socket has registered as player
         socket.emit('guess error', 'pid undefined');
+        return;
+      }
+
+      if(!(guess instanceof Object) || !('target_id' in guess) || !('target_card' in guess) || !('rank' in guess)
+        || isNaN(guess['target_id']) || isNaN(guess['target_card']) || isNaN(guess['rank'])){
+        socket.emit('guess error', 'invalid input');
         return;
       }
 
@@ -56,41 +75,67 @@ module.exports = function(server){
         socket.emit('guess error', 'invalid card');
         return;
       }
-      if(cards[target_id][card][2]){
+      if(cards[target_id][card]['visible']){
         // checks that target card has not been revealed
         socket.emit('guess error', 'card already revealed');
         return;
       }
       
-      if(true_cards[target_id][card][0] == rank){
+      if(true_cards[target_id][card]['rank'] == rank){
         // guess is correct
         // updates public gamestate
-        cards[target_id][card][0] = rank;
-        cards[target_id][card][2] = true;
+        cards[target_id][card]['rank'] = rank;
+        cards[target_id][card]['visible'] = true;
         for(i = 0; i < num_players; ++i) {
           // updates private gamestates
-          private_cards[i][target_id][card][0] = rank;
-          private_cards[i][target_id][card][2] = true;
+          private_cards[i][target_id][card]['rank'] = rank;
+          private_cards[i][target_id][card]['visible'] = true;
         }
 
         // updates guess history
-        public_gs['guess_history'].push([pid, target_id, card, rank, true, card, rank]);
+        public_gs['guess_history'].push({
+          'id':pid, 
+          'target_id':target_id, 
+          'card':card, 
+          'rank':rank, 
+          'correct':true, 
+          'flipped_card':card, 
+          'flipped_rank':rank});
         public_gs['turn'] = (public_gs['turn']+1)%num_players;
         public_gs['phase'] = 'pass';
       } else {
         // guess is incorrect
 
         // updates guess history
-        public_gs['guess_history'].push([pid, target_id, card, rank, false, null, null]);
+        public_gs['guess_history'].push({
+          'id':pid, 
+          'target_id':target_id, 
+          'card':card, 
+          'rank':rank, 
+          'correct':false, 
+          'flipped_card':null, 
+          'flipped_rank':null});
         public_gs['phase'] = 'flip';
       }
-      update_all('guess success');
+      for(i = 0; i < num_players; ++i){
+        if(sockets[i] != null)
+          sockets[i].emit('guess success', {
+            'game_info':game_info,
+            'public':public_gs, 
+            'private':private_gs['cards'][i]
+          });
+      }
     });
 
     socket.on('pass', function(pass){
       // pass is {card}
       if(pid == null){
         socket.emit('pass error', 'pid undefined');
+        return;
+      }
+
+      if(!(pass instanceof Object) || !('card' in pass) || isNaN(pass['card'])) {
+        socket.emit('pass error', 'invalid input');
         return;
       }
 
@@ -114,21 +159,34 @@ module.exports = function(server){
         return;
       }
       
-      var rank = true_cards[pid][card][0];
+      var rank = true_cards[pid][card]['rank'];
       // updates private gamestate
-      private_gs['cards'][public_gs['turn']][pid][card][0] = rank;
+      private_gs['cards'][public_gs['turn']][pid][card]['rank'] = rank;
+      private_gs['cards'][public_gs['turn']][pid][card]['visible'] = true;
 
       // updates pass history
-      public_gs['pass_history'].push([public_gs['turn'], card]);
+      public_gs['pass_history'].push({'id':public_gs['turn'], 'card':card});
       public_gs['phase'] = 'guess';
 
-      update_all('pass success');
+      for(i = 0; i < num_players; ++i){
+        if(sockets[i] != null)
+          sockets[i].emit('pass success', {
+            'game_info':game_info,
+            'public':public_gs, 
+            'private':private_gs['cards'][i]
+          });
+      }
     });
 
     socket.on('flip', function(flip){
       // flip is {card}
       if (pid == null){
         socket.emit('flip error', 'pid undefined');
+        return;
+      }
+
+      if(!(flip instanceof Object) || !('card' in flip) || isNaN(flip['card'])) {
+        socket.emit('flip error', 'invalid input');
         return;
       }
 
@@ -147,34 +205,40 @@ module.exports = function(server){
       }
 
       var cards = public_gs['cards']
-      if(cards[pid][card][2]){
+      if(cards[pid][card]['visible']){
         // checks that card is not already flipped
         socket.emit('flip error', 'card already revealed');
         return;
       }
 
-      var rank = true_cards[pid][card][0];
+      var rank = true_cards[pid][card]['rank'];
 
       // updates public gamestate
-      cards[pid][card][0] = rank;
-      cards[pid][card][2] = true;
+      cards[pid][card]['rank'] = rank;
+      cards[pid][card]['visible'] = true;
       for(i = 0; i < num_players; ++i) {
         // updates private gamestates
-        private_cards[i][pid][card][0] = rank;
-        private_cards[i][pid][card][2] = true;
+        private_cards[i][pid][card]['rank'] = rank;
+        private_cards[i][pid][card]['visible'] = true;
       }
 
       // updates guess history
-      public_gs['guess_history'][public_gs['guess_history'].length - 1][5] = card;
-      public_gs['guess_history'][public_gs['guess_history'].length - 1][6] = rank;
+      public_gs['guess_history'][public_gs['guess_history'].length - 1]['flipped_card'] = card;
+      public_gs['guess_history'][public_gs['guess_history'].length - 1]['flipped_rank'] = rank;
       public_gs['turn'] = (public_gs['turn']+1)%num_players;
       public_gs['phase'] = 'pass';
 
-      update_all('flip success');
+      for(i = 0; i < num_players; ++i){
+        if(sockets[i] != null)
+          sockets[i].emit('flip success', {
+            'game_info':game_info,
+            'public':public_gs, 
+            'private':private_gs['cards'][i]
+          });
+      }
     });
 
     socket.on('chat message', function(data){
-      console.log(data);
       socket.emit('cat response', ['yo', 'wass', 'up']);
     })
 
@@ -183,18 +247,6 @@ module.exports = function(server){
     });
   });
   
-  function update_player(response_type, id){
-    sockets[id].emit(response_type, {'game_info':game_info, 
-                                        'public':public_gs, 
-                                       'private':private_gs['cards'][id]});
-  }
-
-  function update_all(response_type){
-    for(i = 0; i < num_players; ++i)
-      sockets[i].emit(response_type, {'game_info':game_info,
-                                         'public':public_gs, 
-                                        'private':private_gs['cards'][i]});
-  }
 }
 
 // creates a clone of an array
@@ -254,7 +306,7 @@ function generateCards(num_colors, max_rank, num_players) {
   var deck = [];
   for (i = 1; i <= num_colors; ++i)
     for (j = 1; j <= max_rank; ++j)
-      deck.push([j, i]);
+      deck.push({'rank':j, 'color':i});
 
   shuffle(deck);
 
@@ -262,7 +314,7 @@ function generateCards(num_colors, max_rank, num_players) {
   var hand_size = max_rank*num_colors/num_players;
   for (i = 0; i < num_players; ++i){
     var hand = deck.slice(hand_size*i, hand_size*(i+1));
-    hand.sort(function(a, b){return a[0] - b[0]});
+    hand.sort(function(a, b){return a['rank'] - b['rank']});
     cards.push(hand);
   }
 
@@ -295,7 +347,7 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
   for(i = 0; i < true_cards.length; ++i) {
     var hand = [];
     for(j = 0; j < true_cards[0].length; ++j) {
-      hand.push([0, true_cards[i][j][1], false]);
+      hand.push({'rank':0, 'color':true_cards[i][j]['color'], 'visible':false});
     }
     public_gs['cards'].push(hand);
   }
@@ -307,10 +359,10 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
       var hand = [];
       if(i == j) 
         for (k = 0; k < cards[j].length; ++k)
-          hand.push([cards[j][k][0], cards[j][k][1], true]);
+          hand.push({'rank':cards[j][k]['rank'], 'color':cards[j][k]['color'], 'visible':true});
       else 
         for (k = 0; k < cards[j].length; ++k) 
-          hand.push([0, cards[j][k][1], false]);
+          hand.push({'rank':0, 'color':cards[j][k]['color'], 'visible':false});
       player_cards.push(hand);
     }
     private_gs['cards'].push(player_cards);

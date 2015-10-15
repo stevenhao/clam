@@ -62,7 +62,7 @@ app.use(function(err, req, res, next) {
 });
 
 var server = http.createServer(app);
-require('./routes/server')(server);
+require('./server')(server);
 // should be require('./server')(server);
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
