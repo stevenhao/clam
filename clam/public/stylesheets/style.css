@@ -3,6 +3,78 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.hand.highlighted {
+  color: green;
+  border: 3px solid;
+}
+.card {
+  border: dashed 2px;
+  color: gray;
+}
+
+.card .value {
+  color: white;
+  width: 100%;
+  text-align: center;
+}
+
+.card.horizontal {
+  width: 100px;
+  height: 40px;
+}
+
+.card.vertical {
+  width: 40px;
+  height: 100px;
+
+}
+
+.card.black {
+  background-color: black;
+}
+
+.card.red {
+  background-color: red;
+}
+
+.card.flipped {
+  background-color: #F0FFFF;
+  height: 100%;
+  width: 100%;
+}
+
+.card.flipped .value {
+  font-weight: bold;
+  font-size: 30pt;
+  vertical-align: middle;
+
+}
+
+.card.black.flipped .value {
+  color: black;
+}
+
+.card.red.flipped .value {
+  color: red;
+}
+
+.card.selected {
+  color: green;
+  border: solid 3px;
+}
+
+#status, #messages {
+  text-align: center;
+  border: solid 1px;
+  width: 100%;
+  height: 100%;
+}
+
+#status {
+  font-weight: bold;
+  font-size: 30pt;
+}
+
 a {
   color: #00B7FF;
 }
