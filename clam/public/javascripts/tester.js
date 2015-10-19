@@ -1,7 +1,6 @@
 window.onload = function() {
   var socket = io();
   console.log('tester.js is alive.');
-  socket.emit('chat message', 'WHAT IS UP');
 
   sendMessage = function(ev, msg) {
     socket.emit(ev, msg);
@@ -23,7 +22,7 @@ window.onload = function() {
       value = value.replace(/'/g, '"');
       value = jQuery.parseJSON(value);
     } catch (e) {
-        console.log('exception,' + e);
+        console.log('exception', e);
         console.log('submitting as raw string');
     }
     sendMessage(ev, value);
