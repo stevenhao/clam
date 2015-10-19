@@ -39,10 +39,10 @@ render = function() {
 
       var cardEl = $('<div>');
       if (rank) {
-        cardEl.append($('<div class="value">').append(rank));
+        cardEl.append($('<div class="value certain">').append(rank));
       }
       else {
-        cardEl.append($('<div contentEditable="true" class="value">').append("?"));
+        cardEl.append($('<div class="value uncertain">').append("?"));
       }
       cardEl.addClass('card');
       var col = color == 1 ? 'black' : 'red';
