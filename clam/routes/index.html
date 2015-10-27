@@ -16,12 +16,21 @@
      width="90%" height="90%">
      <tr>
        <td>
-          <form style="position: absolute; top: 0; left: 0" id="pidform" action="">
-            PID: <br>
-            <input type="radio" name="pid" value="0">0
-            <input type="radio" name="pid" value="1">1
-            <input type="radio" name="pid" value="2">2
-            <input type="radio" name="pid" value="3">3
+          <form style="position: absolute; top: 0; left: 0"id="register" action="">
+            PID: 
+            <div>
+              <input type="radio" name="pid" value="0">0
+              <input type="radio" name="pid" value="1">1
+              <input type="radio" name="pid" value="2">2
+              <input type="radio" name="pid" value="3">3
+            </div>
+            GID:
+            <div id="gidform">
+              <input type="radio" name="gid" value="0">0
+              <input type="radio" name="gid" value="1">1
+              <input type="radio" name="gid" value="2">2
+              <input type="radio" name="gid" value="3">3
+            </div>
             <button>Send</button>
           </form>
       </td>

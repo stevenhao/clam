@@ -8,10 +8,6 @@ function newGameId(){
 module.exports = function(server){
   var io = require('socket.io')(server);
 
-  io.on('forceDisconnect', function(socket) {
-    socket.disconnect();
-  });
-
   io.on('connection', function(socket){
     console.log('user connected');
     var pid = null;
@@ -26,6 +22,14 @@ module.exports = function(server){
     var sockets = null;
 
     socket.emit('connection', 'user connected');
+
+    socket.on('gameIDs', function() {
+      var lst = [];
+      for (var i = 1; i <= count; ++i) {
+        lst.push(i);
+      }
+      socket.emit('gameIDs', lst);
+    });
 
     socket.on('create', function(ginfo){
       if(!(ginfo instanceof Object) || !('num_players' in ginfo) 

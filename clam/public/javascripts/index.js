@@ -1,4 +1,5 @@
 myPid = 0;
+myGid = 0;
 selectedCard = null
 
 window.onload = function() {
@@ -11,11 +12,23 @@ window.onload = function() {
   });
 
 
-  $('#pidform').submit(function() {
+  $('#register').submit(function() {
     myPid = parseInt($('input[name=pid]:checked').val());
-    socket.emit('register', myPid, 0);
-    print('playing as pid', myPid);
+    myGid = $('input[name=gid]:checked').val();
+    if (myGid == 'New') {
+      print('creating game');
+      socket.on('create success', function(gid) {
+        myGid = gid;
+        updateGameList();
+        updateGame();
+      });
+      socket.emit('create', {'num_players': 4, 'num_ranks': 12, 'num_colors': 2});
+    } else {
+      print('playing as pid, gid:', myPid, myGid);
+      updateGame();
+    }
     return false;
+
   });
 
   $('#goform').submit(function() {
@@ -49,25 +62,30 @@ window.onload = function() {
       }
       socket.emit('flip', {'card': selectedCard.idx});
     }
-
+    updateGame();
   }
     catch(e) {
       print('exception', e);
     }
 
-    update();
+    updateGame();
     return false;
   });
-
-  socket.on('gameList', function(list) {
+  socket.on('gameIDs', function(list) {
     renderGameList(list);
   });
-  socket.emit('getGames');
+  updateGameList();
 };
 
-<<<<<<< HEAD
-function update() {
-  socket.emit('pid', myPid);
+function updateGameList() {
+  print('updating game list');
+  socket.emit('gameIDs');
+
+}
+
+function updateGame() {  
+  print('updating game');
+  socket.emit('register', myPid, myGid);
 }
 
 function partner(x) {
@@ -90,18 +108,24 @@ function getNextAction() {
     print('exception', e);
   }
 }
-=======
+
 renderGameList = function(list) {
+  print('rendering game list', list);
   var gidform = $('#gidform');
-  list.append('New');
+  gidform.html('');
+  list.push('New');
   for (var i = 0; i < list.length; ++i) {
     gid = list[i];
-    var el = $('<input type="radio" name="gid" value="' + gid + '">').append(gid);
+    var el = $('<input type="radio" name="gid" />');
+    el.attr('value', gid);
+    if (gid == myGid) {
+      el.attr('checked', 'checked');
+    }
     gidform.append(el);
+    gidform.append(gid);
   }
 }
 // public_info is a thing
->>>>>>> WIP
 
 print = console.log.bind(console);
 
@@ -120,7 +144,11 @@ render = function() {
     }
     var row = $('<tr>');
 
-    for (var idx = 0; idx < cards.length; ++idx) {
+    for(var _idx = 0; _idx < cards.length; ++_idx) {
+      var idx = _idx;
+      if (hand.hasClass('top') || hand.hasClass('right')) {
+        idx = cards.length - idx - 1;
+      }
       var card = cards[idx];
       var color = card.color;
       var rank = card.rank;
