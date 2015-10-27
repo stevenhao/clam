@@ -18,8 +18,6 @@ window.onload = function() {
   });
 };
 
-// public_info is a thing
-
 print = console.log.bind(console);
 
 render = function() {
