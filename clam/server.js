@@ -209,7 +209,7 @@ module.exports = function(server){
         return;
       }
 
-      var cards = public_gs['cards']
+      var cards = public_gs['cards'];
       if(cards[pid][card]['visible']){
         // checks that card is not already flipped
         socket.emit('flip error', 'card already revealed');
@@ -221,6 +221,7 @@ module.exports = function(server){
       // updates public gamestate
       cards[pid][card]['rank'] = rank;
       cards[pid][card]['visible'] = true;
+      var private_cards = private_gs['cards'];
       for(i = 0; i < num_players; ++i) {
         // updates private gamestates
         private_cards[i][pid][card]['rank'] = rank;
