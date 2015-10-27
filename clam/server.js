@@ -295,7 +295,9 @@ module.exports = function(server){
     });
 
     socket.on('disconnect', function(){
-      sockets[pid] = null;
+      if (pid != null) {
+        sockets[pid] = null;
+      }
     });
   });
   

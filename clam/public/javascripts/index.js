@@ -1,29 +1,113 @@
 myPid = 0;
+selectedCard = null
 
 window.onload = function() {
   socket = io();
   console.log('index.js is alive.');
   socket.on('register success', function(_gameInfo) {
-    console.log('register success!');
+    console.log('register success,', _gameInfo);
     gameInfo = _gameInfo;
     render();
   });
 
-  $('form').submit(function(){
-    print('submit');
-    myPid = parseInt($('input[name=pid]:checked').val());
 
-    socket.emit('register', myPid);
+  $('#pidform').submit(function() {
+    myPid = parseInt($('input[name=pid]:checked').val());
+    socket.emit('register', myPid, 0);
+    print('playing as pid', myPid);
     return false;
   });
+
+  $('#goform').submit(function() {
+    // pass, guess, flip
+    try {
+    if (selectedCard == null) {
+      print('WHAT CARD DUDE');
+      return false;
+    }
+
+    if (myPid != getNextAction()) {
+      print('NOT YOUR TURN BRO!');
+      return false;
+    }
+
+    var phase = gameInfo.public.phase;
+    if (phase == 'pass') {
+      if (selectedCard.pid != myPid) {
+        print('PASS YOUR CARD DUDE');
+        return false;
+      }
+      socket.emit('pass', {'card': selectedCard.idx});
+    } else if (phase == 'guess') {
+      var rank = 1;
+      var guessObj = {'target_id': selectedCard.pid, 'target_card': selectedCard.idx, 'rank': rank};
+      socket.emit('guess', guessObj);
+    } else if (phase == 'flip') {
+      if (selectedCard.pid != myPid) {
+        print('FLIP YOUR CARD DUDE');
+        return false;
+      }
+      socket.emit('flip', {'card': selectedCard.idx});
+    }
+
+  }
+    catch(e) {
+      print('exception', e);
+    }
+
+    update();
+    return false;
+  });
+
+  socket.on('gameList', function(list) {
+    renderGameList(list);
+  });
+  socket.emit('getGames');
 };
+
+<<<<<<< HEAD
+function update() {
+  socket.emit('pid', myPid);
+}
+
+function partner(x) {
+  return (x + 2) % 4;
+}
+
+function getNextAction() {
+  try {
+  print('getting next action.');
+  var turn = gameInfo.public.turn;
+  var phase = gameInfo.public.phase;
+  if (phase == 'pass') {
+    return partner(turn);
+  } else if (phase == 'guess') {
+    return turn;
+  } else if (phase == 'flip') {
+    return turn;
+  }}
+  catch(e){
+    print('exception', e);
+  }
+}
+=======
+renderGameList = function(list) {
+  var gidform = $('#gidform');
+  list.append('New');
+  for (var i = 0; i < list.length; ++i) {
+    gid = list[i];
+    var el = $('<input type="radio" name="gid" value="' + gid + '">').append(gid);
+    gidform.append(el);
+  }
+}
+// public_info is a thing
+>>>>>>> WIP
 
 print = console.log.bind(console);
 
 render = function() {
   console.log('rendering, myPid = ', myPid);
   fillHand = function(hand, cards, pid) {
-    print('fill hand: ', hand, cards, pid);
     orientation = hand.hasClass('vertical') ? 'vertical' : 'horizontal';
     hand.html('');
     addCard = function(cardEl) {
@@ -54,7 +138,6 @@ render = function() {
       cardEl.attr('id', pid + '' + idx);
       cardEl.click(function(p, i) {
         return function() {
-          print('clicked card', p, i);
           selectCard({'idx': i, 'pid': p});
         }
       }(pid, idx));
@@ -66,7 +149,6 @@ render = function() {
     }
 
     setName = function(nametag, name, pid) {
-      print('set name: ', nametag, name);
       nametag.html(name);
     }
   }
@@ -77,11 +159,8 @@ render = function() {
   turn = gameInfo.public.turn;
   handEls = [$('.hand.bottom'), $('.hand.left'), $('.hand.top'), $('.hand.right')];
   nameEls = [$('.name.bottom'), $('.name.left'), $('.name.top'), $('.name.right')];
-  print('myPid:' ,myPid);
   for(var idx = 0; idx < 4; ++idx) {
-    print("myPid, idx, myPid+idx", myPid, idx, myPid+idx);
     oth = (myPid + idx) % 4;
-    print ('oth=', oth);
     fillHand(handEls[idx], gameInfo.private[oth], oth);
     setName(nameEls[idx], gameInfo.public.names[oth], oth);
     if (turn == (myPid + idx) % 4) {
@@ -91,10 +170,10 @@ render = function() {
     }
   }
 
-  $('#status').html(gameInfo.public.names[turn] + ' to play');
+  $('#status').html(gameInfo.public.names[turn] + ' to play<br>'
+    + gameInfo.public.names[getNextAction()] + ' to ' + gameInfo.public.phase);
 }
 
-selectedCard = null
 selectCard = function(card) {
   console.log('select card', card);
   if (selectedCard) {
@@ -105,9 +184,6 @@ selectCard = function(card) {
   } else {
     selectedCard = card;
     var el = $('#' + selectedCard.pid + '' + selectedCard.idx);
-    print(el);
     el.addClass('selected');
   }
 }
-
-$('.view').html('Hi');

@@ -12,11 +12,11 @@
 
   <body>
     <table id="layout" 
-    style="position: absolute; bottom: 0; left: 0; right: 0;"
-     width="100%" height="100%">
+    style="position: absolute; bottom: 10; left: 10; right: -10;"
+     width="90%" height="90%">
      <tr>
        <td>
-          <form style="position: absolute; top: 0; left: 0"action="">
+          <form style="position: absolute; top: 0; left: 0" id="pidform" action="">
             PID: <br>
             <input type="radio" name="pid" value="0">0
             <input type="radio" name="pid" value="1">1
@@ -25,7 +25,7 @@
             <button>Send</button>
           </form>
       </td>
-     </tr>
+      </tr>
       <tr>
         <td colspan="3">
           <table align="center" class="hand top vertical">
@@ -44,8 +44,16 @@
           </td></tr></table>
         </td>
         <td width="100%">
-          <div align="center" id="status" width="100%">
+          <div class="middlebox">
+            <div align="center" id="status">
+            </div>
+            <div id="buttons" align="center">
+              <form id="goform" height="50%">
+                <button class="myButton"> Go </button>
+              </form>
+            </div>
           </div>
+
         </td>
         <td align="right">
           <table align="center" class="hand right horizontal">
