@@ -9,8 +9,8 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       /*body { font: 13px Helvetica, Arial; }*/
-      form { padding: 3px; width: 100%; }
-      form input { border: 1; padding: 10px; width: 90%; margin-right: .5%; }
+      #sendform { padding: 3px; width: 100%; }
+      #sendform input { border: 1; padding: 10px; width: 90%; margin-right: .5%; }
       /*form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }*/
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
@@ -20,16 +20,43 @@
   <body>
     <h1>Test yo shit here</h1>
     <br>
-    <br>
-    <ul id="messages"></ul>
-    <form action="">
-      Event:<br>
-      <input id = "event" type="text" value="pid"/>
-      <br>
-      String or JSON: <br>
-      <input id = "value" type="text" name="lastname" value="1"/>
-      <!-- <input id="m" autocomplete="off" /> -->
-      <button>Send</button>
-    </form>
+    <table width="100%" height="100%">
+      <tr>
+        <td>
+          <form id="register" action="">
+            PID: 
+            <div>
+              <input type="radio" name="pid" value="0">0
+              <input type="radio" name="pid" value="1">1
+              <input type="radio" name="pid" value="2">2
+              <input type="radio" name="pid" value="3">3
+            </div>
+            GID:
+            <div id="gidform">
+              <input type="radio" name="gid" value="0">0
+              <input type="radio" name="gid" value="1">1
+              <input type="radio" name="gid" value="2">2
+              <input type="radio" name="gid" value="3">3
+            </div>
+            <button>Send</button>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <ul id="messages"></ul>
+          <form id="sendform" action="">
+            Event:<br>
+            <input id = "event" type="text" value="pid"/>
+            <br>
+            String or JSON: <br>
+            <input id = "value" type="text" name="lastname" value="1"/>
+            <!-- <input id="m" autocomplete="off" /> -->
+            <button>Send</button>
+          </form>
+        </td>
+        <td> </td>
+      </tr>
+    </table>
   </body>
 </html>
