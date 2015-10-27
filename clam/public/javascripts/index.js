@@ -13,7 +13,7 @@ window.onload = function() {
     print('submit');
     myPid = parseInt($('input[name=pid]:checked').val());
 
-    socket.emit('pid', myPid);
+    socket.emit('register', myPid);
     return false;
   });
 };

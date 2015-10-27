@@ -1,10 +1,12 @@
+var games = {};
+var count = 0;
+function newGameId(){
+  ++count;
+  return count;
+}
+
 module.exports = function(server){
   var io = require('socket.io')(server);
-  var num_players = 4;
-  var num_colors = 2;
-  var num_ranks = 12;
-  initialize(num_players, num_colors, num_ranks, true);
-  var sockets = fillArray(null, num_players);
 
   io.on('forceDisconnect', function(socket) {
     socket.disconnect();
@@ -13,24 +15,68 @@ module.exports = function(server){
   io.on('connection', function(socket){
     console.log('user connected');
     var pid = null;
+    var game_id = null;
+    var num_players = null;
+    var num_colors = null;
+    var num_ranks = null;
+    var game_info = null;
+    var true_cards = null;
+    var public_gs = null;
+    var private_gs = null;
+    var sockets = null;
+
     socket.emit('connection', 'user connected');
 
-    socket.on('pid', function(id){
-      if(isNaN(id)){
+    socket.on('create', function(ginfo){
+      if(!(ginfo instanceof Object) || !('num_players' in ginfo) 
+         || !('num_colors' in ginfo) || !('num_ranks' in ginfo)
+         || isNaN(ginfo['num_players']) || isNaN(ginfo['num_colors']) 
+         || isNaN(ginfo['num_ranks']) || ginfo['num_players'] <= 1 
+         || ginfo['num_colors'] <= 0 || ginfo['num_ranks'] <= 0){
+        socket.emit('create error', 'invalid input');
+      return;
+      }
+      var game = initialize(ginfo['num_players'], ginfo['num_colors'], ginfo['num_ranks'], true);
+      var id = newGameId();
+      games[id] = game;
+
+      socket.emit('create success', id);
+    });
+
+    socket.on('register', function(id, gid){
+      if(isNaN(id) || isNaN(gid)){
         socket.emit('register error', 'invalid input');
         return;
       }
 
-      if(false && pid != null){
-        socket.emit('register error', 'socket already registered');
+      if(!(gid in games)) {
+        socket.emit('register error', 'invalid game_id');
         return;
       }
+
+      game_id = gid;
+      var game = games[game_id];
+
+      game_info = game['game_info'];
+      true_cards = game['true_cards'];
+      public_gs = game['public_gs'];
+      private_gs = game['private_gs'];
+      sockets = game['sockets'];
+      num_players = game_info['num_players'];
+      num_colors = game_info['num_colors'];
+      num_ranks = game_info['num_ranks'];
+      
       // register socket with player id
       if(id >= num_players) // checks that id is valid
         socket.emit('register error', 'invalid id');
       else{
+        if (pid != null) {
+          sockets[pid] = null;
+        }
+
         sockets[id] = socket;
         pid = id;
+
         socket.emit('register success', {
           'game_info':game_info, 
           'public':public_gs, 
@@ -217,7 +263,7 @@ module.exports = function(server){
       }
 
       var rank = true_cards[pid][card]['rank'];
-
+      
       // updates public gamestate
       cards[pid][card]['rank'] = rank;
       cards[pid][card]['visible'] = true;
@@ -246,7 +292,7 @@ module.exports = function(server){
 
     socket.on('chat message', function(data){
       socket.emit('cat response', ['yo', 'wass', 'up']);
-    })
+    });
 
     socket.on('disconnect', function(){
       sockets[pid] = null;
@@ -329,16 +375,18 @@ function generateCards(num_colors, max_rank, num_players) {
 
 // initializes game info, and public and private gamestates
 function initialize(num_players, num_colors, num_ranks, has_teams){
-  game_info = {
+  var game_info = {
     'num_players':num_players,
+    'num_colors':num_colors,
+    'num_ranks':num_ranks,
     'has_teams':has_teams,
     'statuses':fillArray('off', num_players),
     'chat_log':[]
   };
   
-  true_cards = generateCards(num_colors, num_ranks, num_players);
+  var true_cards = generateCards(num_colors, num_ranks, num_players);
 
-  public_gs = {
+  var public_gs = {
     'turn': 0,
     'phase': 'pass',
     'cards': [],
@@ -346,9 +394,11 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
     'guess_history': []
   };
 
-  private_gs = {
+  var private_gs = {
     'cards': []
   }
+
+  var sockets = fillArray(null, num_players);
 
   for(i = 0; i < true_cards.length; ++i) {
     var hand = [];
@@ -372,5 +422,13 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
       player_cards.push(hand);
     }
     private_gs['cards'].push(player_cards);
+  }
+
+  return {
+    'game_info': game_info,
+    'true_cards': true_cards,
+    'public_gs': public_gs,
+    'private_gs': private_gs,
+    'sockets': sockets
   }
 }
