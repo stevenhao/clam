@@ -6,7 +6,12 @@ module.exports = function(server){
   initialize(num_players, num_colors, num_ranks, true);
   var sockets = fillArray(null, num_players);
 
+  io.on('forceDisconnect', function(socket) {
+    socket.disconnect();
+  });
+
   io.on('connection', function(socket){
+    console.log('user connected');
     var pid = null;
     socket.emit('connection', 'user connected');
 
@@ -16,7 +21,7 @@ module.exports = function(server){
         return;
       }
 
-      if(pid != null){
+      if(false && pid != null){
         socket.emit('register error', 'socket already registered');
         return;
       }

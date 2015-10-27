@@ -3,12 +3,12 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-.hand.highlighted {
-  color: green;
-  border: 3px solid;
+.name.highlighted {
+  background-color: yellow;
+  font-weight: bold;
 }
 .card {
-  border: dashed 2px;
+  border: dashed 1px;
   color: gray;
 }
 
@@ -45,7 +45,7 @@ body {
 }
 
 .card.flipped {
-  background-color: #F0FFFF;
+  /*background-color: #F0FFFF;*/
   /*height: 100%;
   width: 100%;*/
 }
@@ -57,13 +57,13 @@ body {
 
 }
 
-.card.black.flipped .value {
+/*.card.black.flipped .value {
   color: black;
 }
 
 .card.red.flipped .value {
   color: red;
-}
+}*/
 
 .card.selected {
   color: green;

@@ -1,4 +1,4 @@
-myPid = 1;
+myPid = 0;
 
 window.onload = function() {
   socket = io();
@@ -9,7 +9,13 @@ window.onload = function() {
     render();
   });
 
-  socket.emit('pid', myPid);
+  $('form').submit(function(){
+    print('submit');
+    myPid = parseInt($('input[name=pid]:checked').val());
+
+    socket.emit('pid', myPid);
+    return false;
+  });
 };
 
 // public_info is a thing
@@ -17,9 +23,9 @@ window.onload = function() {
 print = console.log.bind(console);
 
 render = function() {
-  console.log('rendering.');
+  console.log('rendering, myPid = ', myPid);
   fillHand = function(hand, cards, pid) {
-    print('fill hand: ', hand, cards);
+    print('fill hand: ', hand, cards, pid);
     orientation = hand.hasClass('vertical') ? 'vertical' : 'horizontal';
     hand.html('');
     addCard = function(cardEl) {
@@ -60,19 +66,34 @@ render = function() {
     if (orientation == 'vertical') {
       hand.append(row);
     }
-  }
 
-  turn = gameInfo.public.turn;
-  handEls = [$('.hand.bottom'), $('.hand.left'), $('.hand.top'), $('.hand.right')];
-  for(var idx = 0; idx < 4; ++idx) {
-    oth = (myPid + idx) % 4;
-    fillHand(handEls[idx], gameInfo.private[oth], oth);
-    if (turn == (myPid + idx) % 4) {
-      handEls[idx].addClass('highlighted');
+    setName = function(nametag, name, pid) {
+      print('set name: ', nametag, name);
+      nametag.html(name);
     }
   }
 
-  $('#status').html('Player ' + (turn + 1) + ' to play');
+  // until david implements this
+  gameInfo.public.names = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+
+  turn = gameInfo.public.turn;
+  handEls = [$('.hand.bottom'), $('.hand.left'), $('.hand.top'), $('.hand.right')];
+  nameEls = [$('.name.bottom'), $('.name.left'), $('.name.top'), $('.name.right')];
+  print('myPid:' ,myPid);
+  for(var idx = 0; idx < 4; ++idx) {
+    print("myPid, idx, myPid+idx", myPid, idx, myPid+idx);
+    oth = (myPid + idx) % 4;
+    print ('oth=', oth);
+    fillHand(handEls[idx], gameInfo.private[oth], oth);
+    setName(nameEls[idx], gameInfo.public.names[oth], oth);
+    if (turn == (myPid + idx) % 4) {
+      nameEls[idx].addClass('highlighted');
+    } else {
+      nameEls[idx].removeClass('highlighted');
+    }
+  }
+
+  $('#status').html(gameInfo.public.names[turn] + ' to play');
 }
 
 selectedCard = null
