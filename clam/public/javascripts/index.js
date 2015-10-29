@@ -160,6 +160,9 @@ render = function() {
       else {
         cardEl.append($('<div class="value uncertain">').append("?"));
       }
+      if (card.flipped) {
+        cardEl.addClass('flipped');
+      }
       cardEl.addClass('card');
       var col = color == 1 ? 'black' : 'red';
       cardEl.addClass(col);
