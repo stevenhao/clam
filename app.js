@@ -11,8 +11,7 @@ var users = require('./routes/users');
 var tester = require('./routes/tester');
 
 var app = express();
-
-app.set('port', 3000);
+app.set('port', process.env.PORT || 5000)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
