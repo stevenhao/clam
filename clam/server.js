@@ -145,6 +145,7 @@ module.exports = function(server){
           // updates private gamestates
           private_cards[i][target_id][card]['rank'] = rank;
           private_cards[i][target_id][card]['visible'] = true;
+          private_cards[i][target_id][card]['flipped'] = true;
         }
 
         // updates guess history
@@ -276,6 +277,7 @@ module.exports = function(server){
         // updates private gamestates
         private_cards[i][pid][card]['rank'] = rank;
         private_cards[i][pid][card]['visible'] = true;
+        private_cards[i][pid][card]['flipped'] = true;
       }
 
       // updates guess history
@@ -421,10 +423,10 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
       var hand = [];
       if(i == j) 
         for (k = 0; k < cards[j].length; ++k)
-          hand.push({'rank':cards[j][k]['rank'], 'color':cards[j][k]['color'], 'visible':true});
+          hand.push({'rank':cards[j][k]['rank'], 'color':cards[j][k]['color'], 'visible':true, 'flipped':false});
       else 
         for (k = 0; k < cards[j].length; ++k) 
-          hand.push({'rank':0, 'color':cards[j][k]['color'], 'visible':false});
+          hand.push({'rank':0, 'color':cards[j][k]['color'], 'visible':false, 'flipped':false});
       player_cards.push(hand);
     }
     private_gs['cards'].push(player_cards);
