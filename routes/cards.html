@@ -4,65 +4,27 @@
     <title>Clam</title>
     <script src="javascripts/socket.io.js"></script>
     <script src="javascripts/jquery-2.1.4.min.js"></script>
-    <script src="javascripts/notes.js"></script>
+    <script src="javascripts/cards.js"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/style2.css">
     <style> html, body { height:90%; }</style>
 
   </head>
 
   <body>
-    <table id="layout" 
-    style="position: absolute; bottom: 10; left: 10; right: -10;"
-     width="90%" height="90%">
+    <table height="100%" width="100%">
       <tr>
-        <td colspan="3">
-          <table align="center" class="hand top vertical">
-          </table>
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name top">Top name tag</div>
-          </td></tr></table>        </td>
-      </tr>
-
-      <tr>
-        <td align="left">
-          <table align="center" class="hand left horizontal">
-          </table>
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name left">Left name tag</div>
-          </td></tr></table>
-        </td>
-        <td width="100%">
-
-        </td>
-        <td align="right">
-          <table align="center" class="hand right horizontal">
-          </table>
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name right">Right name tag</div>
-          </td></tr></table>
+        <td align="center" id="container">
+          <img class="cardholder"/>
+          <img class="cardholder1"/>
+          <img class="cardholder2"/>
+          <img class="cardholder3"/>
         </td>
       </tr>
-
       <tr>
-        <td colspan="3">  
-          <table align="center" style="margin: 0px   auto;" class="hand bottom vertical">
-          </table>
-
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name bottom">Bottom name tag</div>
-          </td></tr></table>
-
-        </td>
-      </tr>
-
-      <tr>
-        <td colspan="3">
-          <div align="center" id="messages">
-            Other messages.
-          </div>
+        <td align="center">
+          <button class="myButton"> Go! </button>
         </td>
       </tr>
     </table>
-
   </body>
 </html>
