@@ -1,12 +1,15 @@
 myPid = 0;
 animationCount = 0;
-
 window.onload = function() {
   console.log('cards.js is alive.');
   render();
-  $('.myButton').click(function() {
-    startAnimation(400, 100);
+  $('#animate').submit(function() {
+    speed = parseInt($('input[name=speed').val())
+    startAnimation(speed, 0);
+    return false;
   });
+  canvas = $('#tutorial')[0];
+  ctx = canvas.getContext('2d');
 };
 
 getDeck = function() {
@@ -44,18 +47,49 @@ startAnimation = function(timeout, flash) {
         print('done animating.');
         return;
       }
-      for (var idx = 0; idx < position; ++idx) {
-        setImage(idx, cards[position - idx] + '.jpg');
-      }
+      addCard(cards[position] + '.jpg');
       ++position;
       setTimeout(animate, timeout);
     }, flash);
   }
 
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   animate();
 }
 
 print = console.log.bind(console);
+
+addCard = function(path) {
+  path = "images/" + path;
+  // ctx.fillStyle = "rgb(200,0,0)";
+  // ctx.fillRect (10, 10, 55, 50);
+
+  // ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+  // ctx.fillRect (30, 30, 55, 50);
+  var img = new Image();   // Create new img element
+  img.onload = function() {
+    var iw = img.width;
+    var ih = img.height;
+    var cw = canvas.width;
+    var ch = canvas.height;
+    var sc = .7;
+    var rot = (Math.random() - .5) * 70;
+    var cx = cw / 2;
+    var cy = ch / 2;
+    ctx.translate(cx, cy);
+    ctx.scale(sc, sc);
+    ctx.rotate(Math.PI/180 * rot);
+    // ctx.translate(-cx, -cy);
+    ctx.drawImage(img, -iw/2, -ih/2);
+    // ctx.translate(cx, cy);
+    ctx.rotate(-Math.PI/180 * rot);
+    ctx.scale(1/sc, 1/sc);    
+    ctx.translate(-cx, -cy);
+
+  }
+  img.src = path; // Set source path
+  
+}
 
 setImage = function(idx, path) {
   $('.cardholder' + idx).attr('src', "images/"+path);
@@ -67,14 +101,7 @@ clearImage = function(path) {
 
 render = function() {
   setImage(0, 'Blue_Back.jpg');
-  var wdth = 200;
-  var hght = 300;
-  var container = $('#container');
-  container.html('');
-  for(var idx = 0; idx < 20; ++idx) {
-    var img = $('<img/>').addClass('cardholder' + idx).attr('width', wdth + 'px').attr('height', hght + 'px');
-    wdth *= .8;
-    hght *= .8;
-    container.append(img);
-  }
+  var canvas = $('#tutorial')[0];
+  var ctx = canvas.getContext('2d');
+
 }

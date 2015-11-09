@@ -5,7 +5,7 @@
     <script src="javascripts/socket.io.js"></script>
     <script src="javascripts/jquery-2.1.4.min.js"></script>
     <script src="javascripts/cards.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/style2.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/style3.css">
     <style> html, body { height:90%; }</style>
 
   </head>
@@ -14,15 +14,15 @@
     <table height="100%" width="100%">
       <tr>
         <td align="center" id="container">
-          <img class="cardholder"/>
-          <img class="cardholder1"/>
-          <img class="cardholder2"/>
-          <img class="cardholder3"/>
+          <canvas id="tutorial" width="600" height="600"></canvas>
         </td>
       </tr>
       <tr>
-        <td align="center">
-          <button class="myButton"> Go! </button>
+        <td align="center">            
+          <form id="animate" action="">
+            <input name="speed" value="1000" style="text-align:right">ms
+            <button class="myButton">Animate!</button>
+          </form>
         </td>
       </tr>
     </table>
