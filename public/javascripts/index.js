@@ -1,36 +1,115 @@
-myPid = 0;
-myGid = 0;
-selectedCard = null
+myPid = null;
+myGid = null;
+myView = 'login';
+selectedCard = null;
+myUsername = null;
 
 window.onload = function() {
   socket = io();
   console.log('index.js is alive.');
-  socket.on('register success', function(_gameInfo) {
-    console.log('register success,', _gameInfo);
-    gameInfo = _gameInfo;
-    render();
+
+  // Login Listeners
+  socket.on('login success', function(lobby_data) {
+    if(myView != 'login')
+      return;
+
+    myView = 'lobby';
+    myUsername = lobby_data['username'];
+    renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
+
+    $('#login-view').css({'display':'none'});
+    $('#lobby-view').css({'display':'block'});
   });
 
-
-  $('#register').submit(function() {
-    myPid = parseInt($('input[name=pid]:checked').val());
-    myGid = $('input[name=gid]:checked').val();
-    if (myGid == 'New') {
-      print('creating game');
-      socket.on('create success', function(gid) {
-        myGid = gid;
-        updateGameList();
-        updateGame();
-      });
-      socket.emit('create', {'num_players': 4, 'num_ranks': 12, 'num_colors': 2});
-    } else {
-      print('playing as pid, gid:', myPid, myGid);
-      updateGame();
-    }
+  // Login Javascript
+  $('#login-view').submit(function() {
+    var username = $('#username').val();
+    if (username == '')
+      return false;
+    socket.emit('login', username);
     return false;
-
   });
 
+  // Lobby Listeners
+  socket.on('register success', function(_gameInfo) {
+    if(myView != 'lobby' && !(myView == 'wait' && _gameInfo['gid'] == myGid))
+      return;
+
+    console.log('register success,', _gameInfo);
+
+    myGid = _gameInfo['gid'];
+    myPid = _gameInfo['pid'];
+    renderGame(_gameInfo);
+    $('#'+myView+'-view').css({'display':'none'});
+    $('#game-view').css({'display':'block'});
+
+    myView = 'game';
+  });
+
+  socket.on('join success', function(joinInfo){
+    if(myView != 'lobby')
+      return;
+
+    myGid = joinInfo['gid'];
+    renderWait(joinInfo);
+
+    $('#lobby-view').css({'display':'none'});
+    $('#wait-view').css({'display':'block'});
+    myView = 'wait';
+  });
+
+  socket.on('create success', function(gid) {
+    socket.emit('join', gid);
+  });
+
+  socket.on('updateGameList', function(gameList){
+    if(myView != 'lobby')
+      return;
+    updateLobby(gameList['gameIds'], gameList['openGameIds']);
+  })
+  
+  // Lobby Javascript
+  $('#create-game').click(function(){
+    socket.emit('create', {
+      'num_players': 4,
+      'num_colors': 2,
+      'num_ranks': 12,
+    });
+    return false;
+  })
+
+  // Wait Listeners
+  socket.on('wait update', function(waitInfo){
+    if (myView != 'wait' || myGid != waitInfo['gid']) {
+      return;
+    }
+    updateWait(waitInfo);
+  });
+
+  socket.on('start', function(startInfo){
+    if (myView == 'wait' && myGid == startInfo['gid']) {
+      if(startInfo['usernames'].indexOf(myUsername) != -1) {
+        socket.emit('register', startInfo['gid']);
+      }
+    }
+  });
+
+  // Wait Javascript
+  $('#start-game').click(function(){
+    socket.emit('start');
+  })
+
+  // Game Listeners
+  for(game_event of ['pass success', 'guess success', 'flip success']) {
+    socket.on(game_event, function(_gameInfo) {
+      print(_gameInfo);
+      if(myView != 'game' || myGid != _gameInfo['gid']) {
+        updateGame(_gameInfo);
+      }
+    });
+  }
+
+  // Game Javascript
   $('#goform').submit(function() {
     // pass, guess, flip
     try {
@@ -62,31 +141,16 @@ window.onload = function() {
       }
       socket.emit('flip', {'card': selectedCard.idx});
     }
-    updateGame();
   }
     catch(e) {
       print('exception', e);
     }
 
-    updateGame();
     return false;
   });
-  socket.on('gameIDs', function(list) {
-    renderGameList(list);
-  });
-  updateGameList();
+  
+  // updateGameList();
 };
-
-function updateGameList() {
-  print('updating game list');
-  socket.emit('gameIDs');
-
-}
-
-function updateGame() {  
-  print('updating game');
-  socket.emit('register', myPid, myGid);
-}
 
 function partner(x) {
   return (x + 2) % 4;
@@ -109,27 +173,67 @@ function getNextAction() {
   }
 }
 
-renderGameList = function(list) {
-  print('rendering game list', list);
-  var gidform = $('#gidform');
-  gidform.html('');
-  list.push('New');
-  for (var i = 0; i < list.length; ++i) {
-    gid = list[i];
-    var el = $('<input type="radio" name="gid" />');
-    el.attr('value', gid);
-    if (gid == myGid) {
-      el.attr('checked', 'checked');
-    }
-    gidform.append(el);
-    gidform.append(gid);
+renderLobby = function(games, open_games) {
+  $('#game-ids').html('');
+  $('#open-game-ids').html('');
+  for(game of games) {
+    $('#game-ids').append('<tr><td class="game-cell">'+game+'</td></tr>');
   }
+
+  for(game of open_games) {
+    $('#open-game-ids').append('<tr><td class="open-game-cell">'+game+'</td></tr>');
+  }
+
+  $('.game-cell').click(function(){
+    var gameId = parseInt($(this).html());
+    socket.emit('register', gameId);
+  });
+
+  $('.open-game-cell').click(function(){
+    var gameId = parseInt($(this).html());
+    socket.emit('join', gameId);
+  });
 }
-// public_info is a thing
 
-print = console.log.bind(console);
+updateLobby = function(games, open_games) {
+  renderLobby(games, open_games);
+}
 
-render = function() {
+renderWait = function(gameInfo) {
+  $('#players-list').html('');
+  $('#host').html('Host: ' + gameInfo['host']);
+  for (var i = 0; i < gameInfo['usernames'].length; ++i)
+    $('#players-list').append('<tr><td class="players-list-cell" id="players-list-cell-'+i+'"> </td></tr>');
+  
+  $('.players-list-cell').click(function(){
+    var id = $(this).attr('id');
+    var pid = parseInt(id.substring(id.lastIndexOf('-')+1));
+    socket.emit('add_user', pid);
+  });
+
+  updateWait(gameInfo);
+}
+
+updateWait = function(gameInfo){
+  var filled = true;
+  for (var i = 0; i < gameInfo['usernames'].length; ++i) {
+    if (gameInfo['usernames'][i] == null){
+      $('#players-list-cell-'+i).html('Join as Player '+(i+1));
+      filled = false;
+    } else{
+      $('#players-list-cell-'+i).html(gameInfo['usernames'][i]);
+    }
+  }
+
+  if (myUsername == gameInfo['host'] && filled)
+    $('#start-game').css({'display':'block'});
+  else
+    $('#start-game').css({'display':'none'});
+}
+
+renderGame = function(_gameInfo) {
+  gameInfo = _gameInfo
+
   console.log('rendering, myPid = ', myPid);
   fillHand = function(hand, cards, pid) {
     orientation = hand.hasClass('vertical') ? 'vertical' : 'horizontal';
@@ -185,7 +289,7 @@ render = function() {
   }
 
   // until david implements this
-  gameInfo.public.names = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+  gameInfo.public.names = gameInfo.players;
 
   turn = gameInfo.public.turn;
   handEls = [$('.hand.bottom'), $('.hand.left'), $('.hand.top'), $('.hand.right')];
@@ -205,6 +309,10 @@ render = function() {
     + gameInfo.public.names[getNextAction()] + ' to ' + gameInfo.public.phase);
 }
 
+updateGame = function(_gameInfo) {
+  renderGame(_gameInfo);
+}
+
 selectCard = function(card) {
   console.log('select card', card);
   if (selectedCard) {
@@ -218,3 +326,5 @@ selectCard = function(card) {
     el.addClass('selected');
   }
 }
+
+print = console.log.bind(console);

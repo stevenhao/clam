@@ -1,17 +1,26 @@
 var games = {};
+var open_games = {};
 var count = 0;
 function newGameId(){
   ++count;
   return count;
 }
 
+function listGames(){
+  return Object.keys(games);
+}
+
+function listOpenGames(){
+  return Object.keys(open_games);
+}
 module.exports = function(server){
   var io = require('socket.io')(server);
 
   io.on('connection', function(socket){
     console.log('user connected');
+    var username = null;
     var pid = null;
-    var game_id = null;
+    var gid = null;
     var num_players = null;
     var num_colors = null;
     var num_ranks = null;
@@ -20,15 +29,26 @@ module.exports = function(server){
     var public_gs = null;
     var private_gs = null;
     var sockets = null;
+    var players = null;
 
     socket.emit('connection', 'user connected');
 
-    socket.on('gameIDs', function() {
-      var lst = [];
-      for (var i = 1; i <= count; ++i) {
-        lst.push(i);
+    socket.on('login', function(_username) {
+      if (username != null) {
+        socket.emit('login error', 'already logged in');
+        return;
+      } 
+      if (_username == '') {
+        socket.emit('login error', 'invalid username');
+        return;
       }
-      socket.emit('gameIDs', lst);
+
+      username = _username;
+      socket.emit('login success', {
+        'username': username,
+        'gameIds': listGames(),
+        'openGameIds': listOpenGames()
+      });
     });
 
     socket.on('create', function(ginfo){
@@ -42,25 +62,100 @@ module.exports = function(server){
       }
       var game = initialize(ginfo['num_players'], ginfo['num_colors'], ginfo['num_ranks'], true);
       var id = newGameId();
-      games[id] = game;
+      open_games[id] = game;
+      open_games[id]['host'] = username;
+
+      io.sockets.emit('updateGameList', {
+        'gameIds': listGames(),
+        'openGameIds': listOpenGames()
+      });
 
       socket.emit('create success', id);
     });
 
-    socket.on('register', function(id, gid){
-      if(isNaN(id) || isNaN(gid)){
+    socket.on('join', function(_gid){
+      gid = _gid;
+
+      open_games[gid]['sockets'].push(socket);
+      socket.emit('join success', {
+        'game_info': open_games[gid]['game_info'],
+        'host': open_games[gid]['host'],
+        'usernames': open_games[gid]['usernames'],
+        'gid': gid
+      });
+    });
+
+    socket.on('add_user', function(pid){
+
+      if (pid >= open_games[gid]['game_info']['num_players']) {
+        socket.emit('add_user error', 'invalid pid');
+        return;
+      }
+      var usernames = open_games[gid]['usernames'];
+
+      if (usernames.indexOf(username) != -1)
+        if(usernames[pid] != null)
+          usernames[usernames.indexOf(username)] = usernames[pid];
+        else 
+          usernames[usernames.indexOf(username)] = null;
+
+      usernames[pid] = username;
+
+      for (user of open_games[gid]['sockets']) {
+        user.emit('wait update', {
+          'gid':gid,
+          'game_info': open_games[gid]['game_info'],
+          'host': open_games[gid]['host'],
+          'usernames': open_games[gid]['usernames']
+        });
+      }
+    });
+
+    socket.on('start', function(){
+      var game = open_games[gid];
+      if(username != game['host']){
+        socket.emit('start error', 'user not host');
+        return;
+      }
+      for (name of game['usernames']){
+        if (name == null){
+          socket.emit('start error', 'unfilled positions');
+          return;
+        }
+      }
+      var connected_users = game['sockets'];
+      game['sockets'] = fillArray(null, game['usernames'].length);
+      games[gid] = game;
+      delete open_games[gid];
+
+      for (user of connected_users) {
+        user.emit('start', {
+          'gid': gid,
+          'usernames': game['usernames']
+        });
+      }
+    });
+
+    socket.on('register', function(_gid){
+      if(isNaN(_gid)){
         socket.emit('register error', 'invalid input');
         return;
       }
 
-      if(!(gid in games)) {
+      if(!(_gid in games)) {
         socket.emit('register error', 'invalid game_id');
         return;
       }
 
-      game_id = gid;
-      var game = games[game_id];
+      gid = _gid;
+      var game = games[gid];
 
+      if(game['usernames'].indexOf(username) == -1) {
+        socket.emit('register error', 'invalid user');
+        return;
+      }
+
+      pid = game['usernames'].indexOf(username);
       game_info = game['game_info'];
       true_cards = game['true_cards'];
       public_gs = game['public_gs'];
@@ -69,24 +164,28 @@ module.exports = function(server){
       num_players = game_info['num_players'];
       num_colors = game_info['num_colors'];
       num_ranks = game_info['num_ranks'];
+      players = game['usernames'];
       
       // register socket with player id
-      if(id >= num_players) // checks that id is valid
-        socket.emit('register error', 'invalid id');
-      else{
-        if (pid != null) {
-          sockets[pid] = null;
-        }
+      sockets[pid] = socket;
 
-        sockets[id] = socket;
-        pid = id;
-
-        socket.emit('register success', {
-          'game_info':game_info, 
-          'public':public_gs, 
-          'private':private_gs['cards'][id]
-        });
-      }
+      socket.emit('register success', {
+        'pid':pid,
+        'gid':gid,
+        'game_info':game_info, 
+        'public':public_gs, 
+        'private':private_gs['cards'][pid],
+        'players':players,
+      });
+    });
+    
+    socket.on('wait', function(){
+      socket.emit('wait update', {
+        'gid':gid,
+        'game_info': games[gid]['game_info'],
+        'host': games[gid]['host'],
+        'usernames': games[gid]['usernames']
+      });
     });
 
     socket.on('guess', function(guess){
@@ -178,7 +277,8 @@ module.exports = function(server){
           sockets[i].emit('guess success', {
             'game_info':game_info,
             'public':public_gs, 
-            'private':private_gs['cards'][i]
+            'private':private_gs['cards'][i],
+            'players':players,
           });
       }
     });
@@ -229,7 +329,8 @@ module.exports = function(server){
           sockets[i].emit('pass success', {
             'game_info':game_info,
             'public':public_gs, 
-            'private':private_gs['cards'][i]
+            'private':private_gs['cards'][i],
+            'players':players,
           });
       }
     });
@@ -291,7 +392,8 @@ module.exports = function(server){
           sockets[i].emit('flip success', {
             'game_info':game_info,
             'public':public_gs, 
-            'private':private_gs['cards'][i]
+            'private':private_gs['cards'][i],
+            'players':players,
           });
       }
     });
@@ -406,7 +508,8 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
     'cards': []
   }
 
-  var sockets = fillArray(null, num_players);
+  var sockets = [];
+  var usernames = fillArray(null, num_players);
 
   for(i = 0; i < true_cards.length; ++i) {
     var hand = [];
@@ -437,6 +540,8 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
     'true_cards': true_cards,
     'public_gs': public_gs,
     'private_gs': private_gs,
-    'sockets': sockets
+    'sockets': sockets,
+    'usernames': usernames,
+    'host': null
   }
 }

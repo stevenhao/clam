@@ -3,6 +3,11 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+#buttons {
+  width: 100%;
+  height: 100%;
+}
+
 .name.highlighted {
   background-color: yellow;
   font-weight: bold;
@@ -71,26 +76,26 @@ body {
   border: solid 3px;
 }
 
+.game-cell {
+  height: 30px;
+  width: 100px;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px;
+}
+
+#game-view {
+  display: none;
+}
+
+#lobby-view {
+  display: none;
+}
+
 .middlebox {
   border: solid 1px;
   width: 100%;
   height: 100%;
-}
-
-#buttons {
-  width: 100%;
-  height: 100%;
-}
-
-#status, #messages {
-  text-align: center;
-  width: 100%;
-  height: 50%;
-}
-
-#status {
-  font-weight: bold;
-  font-size: 30pt;
 }
 
 .myButton {
@@ -118,10 +123,45 @@ body {
 
 
 
-
 /* for notes-er */
 .toggleButton {
   position: absolute;
   bottom: 0;
   width: 100%;
 }
+
+.open-game-cell {
+  height: 30px;
+  width: 100px;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.players-list-cell {
+  height: 30px;
+  width: 150px;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px;
+}
+
+#status, #messages {
+  text-align: center;
+  width: 100%;
+  height: 50%;
+}
+
+#start-game {
+  display: none;
+}
+
+#status {
+  font-weight: bold;
+  font-size: 30pt;
+}
+
+#wait-view { 
+  display: none;
+}
+
