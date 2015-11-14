@@ -52,7 +52,7 @@ window.onload = function() {
       }
       socket.emit('pass', {'card': selectedCard.idx});
     } else if (phase == 'guess') {
-      var rank = 1;
+      var rank = $('#guess').val();
       var guessObj = {'target_id': selectedCard.pid, 'target_card': selectedCard.idx, 'rank': rank};
       socket.emit('guess', guessObj);
     } else if (phase == 'flip') {
