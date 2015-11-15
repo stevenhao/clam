@@ -22,7 +22,7 @@
 
     <section id="lobby-view">
       <h1> Lobby </h1>
-      Live Games:
+      Active Games:
       <table id="game-ids">
 
       </table>
@@ -32,6 +32,7 @@
 
       </table>
       <button id='create-game'>Create Game</button>
+      <button class="logout">Logout</button>
     </section>
 
     <section id="wait-view">
@@ -43,11 +44,13 @@
 
       </table>
       <button id="start-game">Start Game</button>
+      <button id="wait-back">Back</button>
+      <button class="logout">Logout</button>
     </section>
 
     <section id="game-view">
       <table id="layout" 
-      style="position: absolute; bottom: 10; left: 10; right: -10;"
+      style="position: absolute; top:15%"
        width="90%" height="90%">
       <tr>
         <td colspan="3">
@@ -109,6 +112,8 @@
           </td>
         </tr>
       </table>
+      <button id="game-back">Back</button>
+      <button class="logout">Logout</button>
     </section>
   </body>
 </html>

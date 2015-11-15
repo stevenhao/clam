@@ -88,6 +88,10 @@ body {
   display: none;
 }
 
+#layout {
+  z-index: 1;
+}
+
 #lobby-view {
   display: none;
 }
@@ -165,3 +169,6 @@ body {
   display: none;
 }
 
+.logout {
+  z-index: 2;
+}

@@ -21,12 +21,34 @@ window.onload = function() {
     $('#lobby-view').css({'display':'block'});
   });
 
+  socket.on('logout success', function(){
+    if(myView =='login')
+      return;
+    
+    myGid = null;
+    myPid = null;
+    myUsername = null;
+
+    $('#'+myView+'-view').css({'display':'none'});
+
+    myView = 'login';
+    $('#login-view').css({'display':'block'});  
+  });
+
   // Login Javascript
   $('#login-view').submit(function() {
     var username = $('#username').val();
     if (username == '')
       return false;
     socket.emit('login', username);
+    return false;
+  });
+
+  $('.logout').click(function(){
+    if(myView == 'login')
+      return false;
+
+    socket.emit('logout');
     return false;
   });
 
@@ -66,19 +88,41 @@ window.onload = function() {
     if(myView != 'lobby')
       return;
     updateLobby(gameList['gameIds'], gameList['openGameIds']);
-  })
+  });
   
   // Lobby Javascript
   $('#create-game').click(function(){
+    if (myView != 'lobby')
+      return;
     socket.emit('create', {
       'num_players': 4,
       'num_colors': 2,
       'num_ranks': 12,
     });
     return false;
-  })
+  });
+
+  $('#wait-back').click(function(){
+    if(myView != 'wait')
+      return;
+
+    socket.emit('wait_back');
+    return false;
+  });
 
   // Wait Listeners
+  socket.on('wait_back success', function(lobby_data){
+    if(myView != 'wait')
+      return;
+    
+    renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
+    myGid = null;
+    myView = 'lobby';
+
+    $('#wait-view').css({'display':'none'});
+    $('#lobby-view').css({'display':'block'});
+  });
+
   socket.on('wait update', function(waitInfo){
     if (myView != 'wait' || myGid != waitInfo['gid']) {
       return;
@@ -102,14 +146,34 @@ window.onload = function() {
   // Game Listeners
   for(game_event of ['pass success', 'guess success', 'flip success']) {
     socket.on(game_event, function(_gameInfo) {
-      print(_gameInfo);
       if(myView != 'game' || myGid != _gameInfo['gid']) {
         updateGame(_gameInfo);
       }
     });
   }
 
+  socket.on('game_back success', function(lobby_data){
+    if(myView != 'game')
+      return;
+    
+    renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
+    myGid = null;
+    myPid = null;
+    myView = 'lobby';
+    
+    $('#game-view').css({'display':'none'});
+    $('#lobby-view').css({'display':'block'});
+  });
+
   // Game Javascript
+  $('#game-back').click(function(){
+    if(myView != 'game')
+      return;
+
+    socket.emit('game_back');
+    return false;
+  });
+
   $('#goform').submit(function() {
     // pass, guess, flip
     try {
