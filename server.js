@@ -1,5 +1,6 @@
 var games = {};
 var open_games = {};
+var finished_games = {};
 var count = 0;
 function newGameId(){
   ++count;
@@ -488,6 +489,39 @@ module.exports = function(server){
           });
       }
     });
+    
+    socket.on('claim', function(guess){
+      // guess is in pid order [[1,2,3,4,5,6],[7,8,9,10,11,12],...]
+      if (view != 'game'){
+        socket.emit('claim error', 'invalid view');
+        return;
+      }
+      var winner = pid%2;
+      for (i = 0; i < num_players; ++i){
+        for (j = 0; j < true_cards[0].length; ++j){
+          if(guess[i][j] != true_cards[i][j]['rank']){
+            winner = 1 - winner;
+            break;
+          }
+        }
+        if(winner != pid%2)
+          break;
+      }
+      public_gs['winner'] = winner;
+      public_gs['phase'] = 'over';
+      for(i = 0; i < num_players; ++i){
+        if(sockets[i] != null)
+          socket.emit('claim success', {
+            'game_info':game_info,
+            'public':public_gs,
+            'true_cards':true_cards,
+            'players':players,
+          });
+      }
+
+      finished_games[gid] = games[gid];
+      delete games[gid];
+    });
 
     socket.on('game_back', function(){
       if(view != 'game') {
@@ -620,7 +654,8 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
     'phase': 'pass',
     'cards': [],
     'pass_history': [],
-    'guess_history': []
+    'guess_history': [],
+    'winner': false
   };
 
   var private_gs = {

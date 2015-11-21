@@ -265,6 +265,7 @@ updateLobby = function(games, open_games) {
 
 renderWait = function(gameInfo) {
   $('#players-list').html('');
+  $('#game-id').html('Game Id: '+gameInfo['gid'])
   $('#host').html('Host: ' + gameInfo['host']);
   for (var i = 0; i < gameInfo['usernames'].length; ++i)
     $('#players-list').append('<tr><td class="players-list-cell" id="players-list-cell-'+i+'"> </td></tr>');

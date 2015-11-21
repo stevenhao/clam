@@ -37,6 +37,7 @@
 
     <section id="wait-view">
       <h1> Waiting Room: </h1> 
+      <h3 id="game-id"> </h3>
       <h3 id="host"> </h3>
 
       <h3> Players: </h3>
@@ -49,71 +50,84 @@
     </section>
 
     <section id="game-view">
-      <table id="layout" 
-      style="position: absolute; top:15%"
-       width="90%" height="90%">
-      <tr>
-        <td colspan="3">
-          <table align="center" class="hand top vertical">
-          </table>
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name top">Top name tag</div>
-          </td></tr></table>        
-        </td>
-      </tr>
+      <div id="game-view-left">
+        <table id="game-layout">
+          <tr>
+            <td>
+            </td>
+            <td colspan="6" style="text-align:center">
+              <span style="font-size:30px;font-weight:bold">It's your turn to pass!</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="player-name">dzd123:</td>
+            <td class="card"></td>
+            <td class="card"></td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+          </tr>
+          <tr>
+            <td class="player-name">P2:</td>
+            <td class="card"></td>
+            <td class="card"></td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+          </tr>
+          <tr>
+            <td class="player-name">P3:</td>
+            <td class="card"></td>
+            <td class="card"></td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+          </tr>
+          <tr>
+            <td class="player-name">P4:</td>
+            <td class="card"></td>
+            <td class="card"></td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+            <td class="card"> </td>
+          </tr>
+          <tr id="num-select">
+            <td></td>
+            <td><div class="num left-num"><span>1</span></div><div class="num right-num"><span>2</span></div></td>
+            <td><div class="num left-num"><span>3</span></div><div class="num right-num"><span>4</span></div></td>
+            <td><div class="num left-num"><span>5</span></div><div class="num right-num"><span>6</span></div></td>
+            <td><div class="num left-num"><span>7</span></div><div class="num right-num"><span>8</span></div></td>
+            <td><div class="num left-num"><span>9</span></div><div class="num right-num"><span>10</span></div></td>
+            <td><div class="num left-num"><span>11</span></div><div class="num right-num"><span>12</span></div></td>
+          </tr>
+          <tr id="submit">
+            <td></td><td></td><td></td>
+            <td colspan="2"><button id="submit">Submit</button></td>
+          </tr>
+          <tr id="filler">
 
-      <tr>
-        <td align="left">
-          <table align="center" class="hand left horizontal">
-          </table>
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name left">Left name tag</div>
-          </td></tr></table>
-        </td>
-        <td width="100%">
-          <div class="middlebox">
-            <div align="center" id="status">
-            </div>
-            <div id="buttons" align="center">
-              <form id="goform" height="50%">
-                <input id="guess" type="text" value="guess" style="text-align: center"/> <br>
-                <button class="myButton"> Go </button>
-              </form>
-            </div>
-        </td>
-
-        <td align="right">
-          <table align="center" class="hand right horizontal">
-          </table>
-          <table align="center"> <tr> <td>
-          <div width="1px" align="center" class="name right">Right name tag</div>
-          </td></tr></table>
-        </td>
-
-        </tr>
-
-        <tr>
-          <td colspan="3">  
-            <table align="center" style="margin: 0px   auto;" class="hand bottom vertical">
-            </table>
-
-            <table align="center"> <tr> <td>
-            <div width="1px" align="center" class="name bottom">Bottom name tag</div>
-            </td></tr></table>
-
-          </td>
-        </tr>
-
-        <tr>
-          <td colspan="3">
-            <div align="center" id="messages">
-              Other messages.
-            </div>
-          </td>
-        </tr>
-      </table>
-      <button id="game-back">Back</button>
-      <button class="logout">Logout</button>
+          </tr>
+          <tr>
+            <td></td><td></td><td></td>
+            <td colspan="2"><button id="claim">Claim</button></td>
+          </tr>
+        </table>
+      </div>
+      <div id="game-view-right">
+        <div>
+          <span style="font-size:30px;font-weight:bold">Notes</span>
+        </div>
+        <textarea id="notes" rows="10" cols="50"></textarea>
+        <div id="history"><div id="text">Welcome to Clam<br>dzd123 passed card 3 to P2</div></div>
+        <div id="return-buttons">
+          <button id="game-back">Back</button>
+          <button class="logout">Logout</button>
+        </div>
+      </div>
     </section>
   </body>
 </html>
