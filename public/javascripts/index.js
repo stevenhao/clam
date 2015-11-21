@@ -35,6 +35,36 @@ window.onload = function() {
     $('#login-view').css({'display':'block'});  
   });
 
+  $('#fast-forward').click(function() {
+    var a = 'a', b = 'b', c = 'c', d = 'd';
+    socket.emit('login', a);
+    socket.emit('create', {
+      'num_players': 4,
+      'num_colors': 2,
+      'num_ranks': 12,
+    });
+
+    socket.emit('add_user', 0);
+    socket.emit('logout');
+
+    socket.emit('login', b);
+    socket.emit('join', 1);
+    socket.emit('add_user', 1);
+    socket.emit('logout');
+
+    socket.emit('login', c);
+    socket.emit('join', 1);
+    socket.emit('add_user', 2);
+    socket.emit('logout');
+
+    socket.emit('login', d);
+    socket.emit('join', 1);
+    socket.emit('add_user', 3);
+    socket.emit('logout');
+
+    socket.emit('login', a);
+    socket.emit('join', 1);
+  })
   // Login Javascript
   $('#login-view').submit(function() {
     var username = $('#username').val();
