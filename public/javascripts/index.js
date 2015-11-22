@@ -330,11 +330,11 @@ cardId = function(pid, idx) {
   return 'card-' + pid + '-' + idx;
 }
 
-nameTagId = function(pid) {
+nameId = function(pid) {
   return 'nameTag-' + pid;
 }
 
-renderGame = function() {
+renderGame = function(gameInfo) {
   createNameEl = function() {
     var td = $('<td>').addClass('player-name');
     return td;
@@ -349,7 +349,7 @@ renderGame = function() {
     var handEl = $('<tr>');
     var nameEl = createNameEl(name);
     handEl.append(nameEl);
-    nameEl.attr('id', nameTagId(pid));
+    nameEl.attr('id', nameId(pid));
 
     for (var idx = 0; idx < 6; ++idx) {
       var cardEl = createCardEl();
@@ -428,14 +428,54 @@ renderGame = function() {
   table.append($('<tr id="filler">'));
   table.append(createClamEl());
 
+  updateObjects(gameInfo);
 }
 
-updateObjects = function(_gameInfo) {
+updateObjects = function(gameInfo) {
+  for (var pid = 0; pid < 4; ++pid) {
+  }
 
+  for (var pid = 0; pid < 4; ++pid) {
+    // fill names
+    var nameEl = $('#' + nameId(pid));    
+    var name = gameInfo.players[pid];
+    nameEl.html(name);
+
+    for(var idx = 0; idx < 6; ++idx) {
+      var cardEl = $('#' + cardId(pid, idx));
+      var cardInfo = gameInfo.private[pid][idx];
+
+      // fill card backs
+      if (cardInfo.color == 1) {
+        cardEl.addClass('red');
+        cardEl.removeClass('black');
+      } else { // color == 2
+        cardEl.addClass('black');
+        cardEl.removeClass('red');
+      }
+
+      // fill card ranks
+      var rank = cardInfo.rank;
+      if (rank != 0) {
+        cardEl.addClass('visible');
+        cardEl.html(rank);
+      } else {
+        cardEl.removeClass('visible');
+        cardEl.html('?');
+      }
+
+      // set card visibility
+      if (cardInfo.visible) {
+        cardEl.addClass('flipped');
+      } else {
+        cardEl.removeClass('flipped');
+      }
+    }
+  }
 }
 
-updateGame = function(_gameInfo) {
-  renderGame(_gameInfo);
+updateGame = function(gameInfo) {
+  updateObjects(_gameInfo);
 }
 
 selectCard = function(card) {
