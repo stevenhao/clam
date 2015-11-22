@@ -24,10 +24,25 @@ body {
 }
 
 #lobby-view {
+  position:fixed;
+  top: 50%;
+  left: 50%;
+  width:30em;
+  height:18em;
+  margin-top: -15em; /*set to a negative number 1/2 of your height*/
+  margin-left: -9em; /*set to a negative number 1/2 of your width*/
   display: none;
 }
 
-
+#login-view {
+  position:fixed;
+  top: 50%;
+  left: 50%;
+  width:30em;
+  height:18em;
+  margin-top: -9em; /*set to a negative number 1/2 of your height*/
+  margin-left: -15em; /*set to a negative number 1/2 of your width*/
+}
 /* for notes-er */
 
 .open-game-cell {
@@ -56,6 +71,13 @@ body {
 }
 
 #wait-view { 
+  position:fixed;
+  top: 50%;
+  left: 50%;
+  width:30em;
+  height:18em;
+  margin-top: -15em; /*set to a negative number 1/2 of your height*/
+  margin-left: -9em; /*set to a negative number 1/2 of your width*/
   display: none;
 }
 
@@ -153,7 +175,7 @@ body {
   max-height: 235px;
   overflow-y: scroll;
 }
-#text{
+#history-text{
   margin-left:10px;
 }
 #return-buttons {

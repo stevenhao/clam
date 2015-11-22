@@ -196,6 +196,11 @@ window.onload = function() {
   });
 
   // Game Javascript
+  $('#claim').click(function(){
+
+    // socket.emit('claim', )
+  });
+
   $('#game-back').click(function(){
     if(myView != 'game')
       return;
@@ -434,9 +439,6 @@ renderGame = function(gameInfo) {
 
 updateObjects = function(gameInfo) {
   for (var pid = 0; pid < 4; ++pid) {
-  }
-
-  for (var pid = 0; pid < 4; ++pid) {
     // fill names
     var nameEl = $('#' + nameId(pid));    
     var name = gameInfo.players[pid];
@@ -473,10 +475,23 @@ updateObjects = function(gameInfo) {
       }
     }
   }
+
+  $('#history-text').html('');
+  var messages = gameInfo.public.history;
+  for(i = 0; i < messages.length; ++i) {
+    $('#history-text').append(messages[i]['message']+'<br>');
+  }
+  messageCounter = messages.length;
 }
 
-updateGame = function(gameInfo) {
-  updateObjects(_gameInfo);
+updateGame = function(_gameInfo) {
+  gameInfo = _gameInfo;
+
+  var messages = gameInfo.public.history;
+  for(i = messageCounter; i < messages.length; ++i) {
+    $('#history-text').append(messages[i]['message']+'<br>');
+  }
+  messageCounter = messages.length;
 }
 
 selectCard = function(card) {

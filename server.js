@@ -18,7 +18,6 @@ module.exports = function(server){
   var io = require('socket.io')(server);
 
   io.on('connection', function(socket){
-    console.log('user connected');
     var username = null;
     var pid = null;
     var gid = null;
@@ -253,9 +252,7 @@ module.exports = function(server){
         return;
       }
 
-      console.log('sockets before: '+open_games[gid]['sockets'].length)
       open_games[gid]['sockets'].remove(socket);
-      console.log('sockets after: '+open_games[gid]['sockets'].length)
       gid = null;
       view = 'lobby';
       socket.emit('wait_back success', {
@@ -327,29 +324,31 @@ module.exports = function(server){
           private_cards[i][target_id][card]['flipped'] = true;
         }
 
+        var message = players[pid]+' CORRECTLY guessed card '+(card+1)+' of '+players[target_id]+"'s hand as "+rank;
         // updates guess history
-        public_gs['guess_history'].push({
+        public_gs['history'].push({
+          'move':'guess',
           'id':pid, 
           'target_id':target_id, 
           'card':card, 
           'rank':rank, 
           'correct':true, 
-          'flipped_card':card, 
-          'flipped_rank':rank});
+          'message': message});
         public_gs['turn'] = (public_gs['turn']+1)%num_players;
         public_gs['phase'] = 'pass';
       } else {
         // guess is incorrect
 
+        var message = players[pid]+' INCORRECTLY guessed card '+(card+1)+' of '+players[target_id]+"'s hand as "+rank;
         // updates guess history
-        public_gs['guess_history'].push({
+        public_gs['history'].push({
+          'move':'guess',
           'id':pid, 
           'target_id':target_id, 
           'card':card, 
           'rank':rank, 
           'correct':false, 
-          'flipped_card':null, 
-          'flipped_rank':null});
+          'message':message});
         public_gs['phase'] = 'flip';
       }
       for(i = 0; i < num_players; ++i){
@@ -406,8 +405,9 @@ module.exports = function(server){
       private_gs['cards'][public_gs['turn']][pid][card]['rank'] = rank;
       private_gs['cards'][public_gs['turn']][pid][card]['visible'] = true;
 
+      var message = players[pid]+' passed card '+(card+1)+' to '+players[public_gs['turn']];
       // updates pass history
-      public_gs['pass_history'].push({'id':public_gs['turn'], 'card':card});
+      public_gs['history'].push({'move':'pass','id':public_gs['turn'], 'card':card, 'message':message});
       public_gs['phase'] = 'guess';
 
       for(i = 0; i < num_players; ++i){
@@ -474,8 +474,14 @@ module.exports = function(server){
       }
 
       // updates guess history
-      public_gs['guess_history'][public_gs['guess_history'].length - 1]['flipped_card'] = card;
-      public_gs['guess_history'][public_gs['guess_history'].length - 1]['flipped_rank'] = rank;
+      var message = players[pid]+' flipped card '+(card+1);
+      public_gs['history'].push({
+        'move':'flip',
+        'id':pid, 
+        'card':card, 
+        'rank':rank, 
+        'message':message
+      })
       public_gs['turn'] = (public_gs['turn']+1)%num_players;
       public_gs['phase'] = 'pass';
 
@@ -509,6 +515,19 @@ module.exports = function(server){
       }
       public_gs['winner'] = winner;
       public_gs['phase'] = 'over';
+
+      var message = "";
+      if(winner == pid%2){
+        message = players[pid]+' claims successfully!\n'+players[pid]+' and '+players[(pid+2)%num_players]+' WIN :)';
+      }else{
+        message = players[pid]+' claims incorrectly!\n'+players[(pid+1)%num_players]+' and '+players[(pid+3)%num_players]+' WIN :)';
+      }
+      public_gs['history'].push({
+        'move':'claim',
+        'id':pid,
+        'winner':pid%2,
+        'message':message
+      })
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
           socket.emit('claim success', {
@@ -653,8 +672,7 @@ function initialize(num_players, num_colors, num_ranks, has_teams){
     'turn': 0,
     'phase': 'pass',
     'cards': [],
-    'pass_history': [],
-    'guess_history': [],
+    'history': [{'move':'start', 'message':'Welcome to Clam!'}],
     'winner': false
   };
 
