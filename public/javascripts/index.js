@@ -326,82 +326,112 @@ updateWait = function(gameInfo){
     $('#start-game').css({'display':'none'});
 }
 
-renderGame = function(_gameInfo) {
-  gameInfo = _gameInfo
+cardId = function(pid, idx) {
+  return 'card-' + pid + '-' + idx;
+}
 
-  console.log('rendering, myPid = ', myPid);
-  fillHand = function(hand, cards, pid) {
-    orientation = hand.hasClass('vertical') ? 'vertical' : 'horizontal';
-    hand.html('');
-    addCard = function(cardEl) {
-      cardEl.addClass(orientation);
-      if (orientation == 'vertical') {
-        row.append($('<td>').append(cardEl));
-      } else {
-        hand.append($('<tr>').append($('<td>').append(cardEl)));
-      }
+nameTagId = function(pid) {
+  return 'nameTag-' + pid;
+}
+
+renderGame = function() {
+  createNameEl = function() {
+    var td = $('<td>').addClass('player-name');
+    return td;
+  }
+
+  createCardEl = function() {
+    var td = $('<td>').addClass('card');
+    return td;
+  }
+
+  createHandEl = function(pid) {
+    var handEl = $('<tr>');
+    var nameEl = createNameEl(name);
+    handEl.append(nameEl);
+    nameEl.attr('id', nameTagId(pid));
+
+    for (var idx = 0; idx < 6; ++idx) {
+      var cardEl = createCardEl();
+      cardEl.attr('id', cardId(pid, idx));
+      handEl.append(cardEl);
     }
-    var row = $('<tr>');
+    return handEl;
+  }
 
-    for(var _idx = 0; _idx < cards.length; ++_idx) {
-      var idx = _idx;
-      if (hand.hasClass('top') || hand.hasClass('right')) {
-        idx = cards.length - idx - 1;
-      }
-      var card = cards[idx];
-      var color = card.color;
-      var rank = card.rank;
-
-      var cardEl = $('<div>');
-      if (rank) {
-        cardEl.append($('<div class="value certain">').append(rank));
-      }
-      else {
-        cardEl.append($('<div class="value uncertain">').append("?"));
-      }
-      if (card.flipped) {
-        cardEl.addClass('flipped');
-      }
-      cardEl.addClass('card');
-      var col = color == 1 ? 'black' : 'red';
-      cardEl.addClass(col);
-      cardEl.attr('id', pid + '' + idx);
-      cardEl.click(function(p, i) {
-        return function() {
-          selectCard({'idx': i, 'pid': p});
+  createSelectEl = function() {
+    var tr = $('<tr>').attr('id', 'num-select');
+    tr.append($('<td>'));
+    for (var i = 1; i <= 12; i += 2) {
+      var td = $('<td>');
+      tr.append(td);
+      for (var j = i; j <= i + 1; ++j) {
+        var div = $('<div>').addClass('num');
+        td.append(div);
+        if (j % 2 == 1) {
+          div.addClass('left-num');
+        } else {
+          div.addClass('right-num');
         }
-      }(pid, idx));
-      addCard(cardEl);
+        div.append($('<span>').append(j));
+        div.click((function(num) {
+          return function() {
+            print('clicked', num);
+          }
+        })(j));
+      }
     }
-
-    if (orientation == 'vertical') {
-      hand.append(row);
-    }
-
-    setName = function(nametag, name, pid) {
-      nametag.html(name);
-    }
+    return tr;
   }
 
-  // until david implements this
-  gameInfo.public.names = gameInfo.players;
-
-  turn = gameInfo.public.turn;
-  handEls = [$('.hand.bottom'), $('.hand.left'), $('.hand.top'), $('.hand.right')];
-  nameEls = [$('.name.bottom'), $('.name.left'), $('.name.top'), $('.name.right')];
-  for(var idx = 0; idx < 4; ++idx) {
-    oth = (myPid + idx) % 4;
-    fillHand(handEls[idx], gameInfo.private[oth], oth);
-    setName(nameEls[idx], gameInfo.public.names[oth], oth);
-    if (turn == (myPid + idx) % 4) {
-      nameEls[idx].addClass('highlighted');
-    } else {
-      nameEls[idx].removeClass('highlighted');
-    }
+  createSubmitEl = function() {
+    var tr = $('<tr>');
+    var td = $('<td>').attr('colspan', '2');
+    var button = $('<button>').attr('id', 'submit');
+    tr.append($('<td>'));
+    tr.append($('<td>'));
+    tr.append($('<td>'));
+    tr.append(td);
+    td.append(button);
+    button.append('Submit');
+    button.click(function() {
+      print('submit was clicked.');
+    });
+    return tr;
   }
 
-  $('#status').html(gameInfo.public.names[turn] + ' to play<br>'
-    + gameInfo.public.names[getNextAction()] + ' to ' + gameInfo.public.phase);
+  createClamEl = function() {
+    var tr = $('<tr>');
+    var td = $('<td>').attr('colspan', '2');
+    var button = $('<button>').attr('id', 'claim');
+    tr.append($('<td>'));
+    tr.append($('<td>'));
+    tr.append($('<td>'));
+    tr.append(td);
+    td.append(button);
+    button.append('Claim');
+    button.click(function() {
+      print('clam was clicked.');
+    });
+    return tr;
+  }
+
+  var table = $('#game-layout');
+  var pid = myPid;
+  do {
+    table.append(createHandEl(pid));
+    pid = (pid + 1) % 4;
+  } while (pid != myPid);
+
+  table.append(createSelectEl());
+  table.append(createSubmitEl());
+  table.append($('<tr id="filler">'));
+  table.append(createClamEl());
+
+}
+
+updateObjects = function(_gameInfo) {
+
 }
 
 updateGame = function(_gameInfo) {
