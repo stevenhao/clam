@@ -6,17 +6,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var tester = require('./routes/tester');
-var notes = require('./routes/notes');
-var cards = require('./routes/cards');
-
 var app = express();
 app.set('port', process.env.PORT || 5000)
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -26,16 +17,29 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use('/', routes);
-app.use('/', index);
-app.use('/tester', tester);
-app.use('/users', users);
-app.use('/notes', notes);
-app.use('/cards', cards);
+
+app.get('/', function(req, res) {
+  res.sendfile('views/index.html');
+});
+
+app.get('/tester', function(req, res) {
+  res.sendfile('views/tester.html');
+});
+
+
+app.get('/notes', function(req, res) {
+  res.sendfile('views/notes.html');
+});
+
+
+app.get('/cards', function(req, res) {
+  res.sendfile('views/cards.html');
+});
+
 
 var server = http.createServer(app);
 require('./server')(server);
-// should be require('./server')(server);
+
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
