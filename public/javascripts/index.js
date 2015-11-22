@@ -417,6 +417,7 @@ renderGame = function(gameInfo) {
   }
 
   var table = $('#game-layout');
+  table.empty();
   var pid = myPid;
   do {
     table.append(createHandEl(pid));
