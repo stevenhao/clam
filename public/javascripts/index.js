@@ -3,6 +3,8 @@ myGid = null;
 myView = 'login';
 selectedCard = null;
 myUsername = null;
+print = console.log.bind(console);
+messageCounter = 0;
 
 window.onload = function() {
   socket = io();
@@ -64,7 +66,8 @@ window.onload = function() {
 
     socket.emit('login', a);
     socket.emit('join', 1);
-  })
+  });
+
   // Login Javascript
   $('#login-view').submit(function() {
     var username = $('#username').val();
@@ -251,25 +254,8 @@ window.onload = function() {
   // updateGameList();
 };
 
-function partner(x) {
+partner = function(x) {
   return (x + 2) % 4;
-}
-
-function getNextAction() {
-  try {
-  print('getting next action.');
-  var turn = gameInfo.public.turn;
-  var phase = gameInfo.public.phase;
-  if (phase == 'pass') {
-    return partner(turn);
-  } else if (phase == 'guess') {
-    return turn;
-  } else if (phase == 'flip') {
-    return turn;
-  }}
-  catch(e){
-    print('exception', e);
-  }
 }
 
 renderLobby = function(games, open_games) {
@@ -352,13 +338,11 @@ renderGame = function(gameInfo) {
 
   createHandEl = function(pid) {
     var handEl = $('<tr>');
-    var nameEl = createNameEl(name);
+    var nameEl = createNameEl(name).attr('id', nameId(pid));
     handEl.append(nameEl);
-    nameEl.attr('id', nameId(pid));
 
     for (var idx = 0; idx < 6; ++idx) {
-      var cardEl = createCardEl();
-      cardEl.attr('id', cardId(pid, idx));
+      var cardEl = createCardEl().attr('id', cardId(pid, idx));
       handEl.append(cardEl);
     }
     return handEl;
@@ -372,18 +356,17 @@ renderGame = function(gameInfo) {
       tr.append(td);
       for (var j = i; j <= i + 1; ++j) {
         var div = $('<div>').addClass('num');
-        td.append(div);
         if (j % 2 == 1) {
           div.addClass('left-num');
         } else {
           div.addClass('right-num');
         }
-        div.append($('<span>').append(j));
-        div.click((function(num) {
-          return function() {
-            print('clicked', num);
-          }
-        })(j));
+        td.append(div.append($('<span>').append(j)));
+
+        div.attr('value', j);
+        div.click(function() {
+          print('clicked', $(this).attr('value'));
+        });
       }
     }
     return tr;
@@ -393,12 +376,8 @@ renderGame = function(gameInfo) {
     var tr = $('<tr>');
     var td = $('<td>').attr('colspan', '2');
     var button = $('<button>').attr('id', 'submit');
-    tr.append($('<td>'));
-    tr.append($('<td>'));
-    tr.append($('<td>'));
-    tr.append(td);
-    td.append(button);
-    button.append('Submit');
+    tr.append($('<td>')).append($('<td>')).append($('<td>'));
+    tr.append(td.append(button.append('Submit')));
     button.click(function() {
       print('submit was clicked.');
     });
@@ -409,12 +388,8 @@ renderGame = function(gameInfo) {
     var tr = $('<tr>');
     var td = $('<td>').attr('colspan', '2');
     var button = $('<button>').attr('id', 'claim');
-    tr.append($('<td>'));
-    tr.append($('<td>'));
-    tr.append($('<td>'));
-    tr.append(td);
-    td.append(button);
-    button.append('Claim');
+    tr.append($('<td>')).append($('<td>')).append($('<td>'));
+    tr.append(td.append(button.append('Claim')));
     button.click(function() {
       print('clam was clicked.');
     });
@@ -447,10 +422,76 @@ renderGame = function(gameInfo) {
   table.append($('<tr id="filler">'));
   table.append(createClamEl());
 
+  $('#history-text').empty();
+
   updateObjects(gameInfo);
 }
 
 updateObjects = function(gameInfo) {
+  updateCardEl = function(cardEl) {
+    var cardInfo = gameInfo.private[pid][idx];
+
+    // fill card backs
+    if (cardInfo.color == 1) {
+      cardEl.addClass('red');
+      cardEl.removeClass('black');
+    } else { // color == 2
+      cardEl.addClass('black');
+      cardEl.removeClass('red');
+    }
+
+    // fill card ranks
+    var rank = cardInfo.rank;
+    if (rank != 0) {
+      cardEl.addClass('known');
+      cardEl.removeClass('unknown');
+      cardEl.html(rank);
+    } else {
+      cardEl.removeClass('known');
+      cardEl.addClass('unknown');
+      cardEl.html('?');
+    }
+
+    // set card flipped
+    if (cardInfo.flipped) {
+      cardEl.addClass('flipped');
+    } else {
+      cardEl.removeClass('flipped');
+    }
+  }
+
+  updateStatusEl = function(el) {
+    var turn = parseInt(gameInfo.public.turn);
+    var phase = gameInfo.public.phase;
+    var names = gameInfo.players;
+
+    createStatusMessage = function() {
+      if (phase == 'pass') {
+        var pid = partner(turn);
+        return names[pid] + ' to pass';
+      } else if (phase == 'guess') {
+        var pid = turn;
+        return names[pid] + ' to guess';
+      } else if (phase == 'flip') {
+        var pid = turn;
+        return names[pid] + ' to flip';
+      } else if (phase == 'over') {
+        // TODO: check who won, etc.
+        return 'Game over';
+      }
+    }
+
+    el.html(createStatusMessage());
+  }
+
+  updateHistoryEl = function(el) {
+    var history = gameInfo.public.history;
+    while (messageCounter < history.length) {
+      el.append(history[messageCounter].message).append($('<br>'));
+      ++messageCounter;
+    }
+  }
+
   for (var pid = 0; pid < 4; ++pid) {
     // fill names
     var nameEl = $('#' + nameId(pid));    
@@ -459,52 +500,17 @@ updateObjects = function(gameInfo) {
 
     for(var idx = 0; idx < 6; ++idx) {
       var cardEl = $('#' + cardId(pid, idx));
-      var cardInfo = gameInfo.private[pid][idx];
-
-      // fill card backs
-      if (cardInfo.color == 1) {
-        cardEl.addClass('red');
-        cardEl.removeClass('black');
-      } else { // color == 2
-        cardEl.addClass('black');
-        cardEl.removeClass('red');
-      }
-
-      // fill card ranks
-      var rank = cardInfo.rank;
-      if (rank != 0) {
-        cardEl.addClass('visible');
-        cardEl.html(rank);
-      } else {
-        cardEl.removeClass('visible');
-        cardEl.html('?');
-      }
-
-      // set card visibility
-      if (cardInfo.visible) {
-        cardEl.addClass('flipped');
-      } else {
-        cardEl.removeClass('flipped');
-      }
+      updateCardEl(cardEl);
     }
   }
 
-  $('#history-text').html('');
-  var messages = gameInfo.public.history;
-  for(i = 0; i < messages.length; ++i) {
-    $('#history-text').append(messages[i]['message']+'<br>');
-  }
-  messageCounter = messages.length;
+  updateStatusEl($('#status'));
+  updateHistoryEl($('#history-text'));
 }
 
 updateGame = function(_gameInfo) {
   gameInfo = _gameInfo;
-
-  var messages = gameInfo.public.history;
-  for(i = messageCounter; i < messages.length; ++i) {
-    $('#history-text').append(messages[i]['message']+'<br>');
-  }
-  messageCounter = messages.length;
+  updateObjects();
 }
 
 selectCard = function(card) {
@@ -520,5 +526,3 @@ selectCard = function(card) {
     el.addClass('selected');
   }
 }
-
-print = console.log.bind(console);
