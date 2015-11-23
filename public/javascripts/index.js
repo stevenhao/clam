@@ -45,8 +45,6 @@ window.onload = function() {
       'num_colors': 2,
       'num_ranks': 12,
     });
-
-    socket.emit('add_user', 0);
     socket.emit('logout');
 
     socket.emit('login', b);
@@ -66,6 +64,8 @@ window.onload = function() {
 
     socket.emit('login', a);
     socket.emit('join', 1);
+    socket.emit('add_user', 0);
+    socket.emit('start');
   });
 
   // Login Javascript
