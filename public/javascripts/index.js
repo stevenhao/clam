@@ -343,6 +343,9 @@ renderGame = function(gameInfo) {
 
     for (var idx = 0; idx < 6; ++idx) {
       var cardEl = createCardEl().attr('id', cardId(pid, idx));
+      cardEl.click(function() {
+        selectCard($(this));
+      });
       handEl.append(cardEl);
     }
     return handEl;
@@ -515,14 +518,15 @@ updateGame = function(_gameInfo) {
 
 selectCard = function(card) {
   console.log('select card', card);
-  if (selectedCard) {
-    $('#' + selectedCard.pid + '' + selectedCard.idx).removeClass('selected');
-  }
-  if (selectedCard != null && selectedCard.idx == card.idx && selectedCard.pid ==  card.pid) {
+  if (card.hasClass('selected')) {
+    card.removeClass('selected');
     selectedCard = null;
   } else {
+    if (selectedCard) {
+      selectedCard.removeClass('selected');
+    }
+
+    card.addClass('selected');
     selectedCard = card;
-    var el = $('#' + selectedCard.pid + '' + selectedCard.idx);
-    el.addClass('selected');
   }
 }
