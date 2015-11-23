@@ -452,7 +452,9 @@ updateObjects = function(gameInfo) {
     } else {
       cardEl.removeClass('known');
       cardEl.addClass('unknown');
-      cardEl.html('?');
+      if (cardEl.html().length == 0) {
+        cardEl.html('?');
+      }
     }
 
     // set card flipped
@@ -509,6 +511,7 @@ updateObjects = function(gameInfo) {
 
   updateStatusEl($('#status'));
   updateHistoryEl($('#history-text'));
+
 }
 
 updateGame = function(_gameInfo) {
