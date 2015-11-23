@@ -421,8 +421,21 @@ renderGame = function(gameInfo) {
     return tr;
   }
 
+  createStatusEl = function() {
+    var tr = $('<tr>');
+    var td = $('<td>');
+    var span = $('<span>');
+    td.attr('colspan', '6').css('text-align:center');
+    span.attr('id', 'status').css('font-size:30px;font-weight:bold');
+    span.append("It's your turn to pass!");
+    tr.append($('<td>')).append(td.append(span));
+    return tr;
+  }
+
   var table = $('#game-layout');
   table.empty();
+
+  table.append(createStatusEl());
   var pid = myPid;
   do {
     table.append(createHandEl(pid));
