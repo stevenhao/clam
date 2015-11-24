@@ -352,7 +352,7 @@ renderGame = function(gameInfo) {
   }
 
   createSelectEl = function() {
-    var tr = $('<tr>').attr('id', 'num-select');
+    var tr = $('<tr>').attr('id', 'select');
     tr.append($('<td>'));
     for (var i = 1; i <= 12; i += 2) {
       var td = $('<td>');
