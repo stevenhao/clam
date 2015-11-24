@@ -86,17 +86,17 @@ function saveGame(table, game, gid){
     'usernames': game.usernames,
     'host': game.host
   });
+  game = game.replace("'", "\\\'");
 
   connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result){
     if(err) throw err;
-    console.log(result);
     if(result[0]['COUNT(*)'] == 0){
       connection.query("INSERT INTO "+DATABASE+"."+table+"\n VALUES ('"+gid+"', '"+game+"');", function(err, result){
         if(err) throw err;
       });
     }else{
-      console.log('what up4');
       connection.query("UPDATE "+DATABASE+"."+table+"\n SET game_info='"+game+"'\n WHERE gid='"+gid+"';", function(err, result){
+        
         if(err) throw err;
       });
     }
@@ -207,11 +207,6 @@ module.exports = function(server){
         return;
       }
 
-      if(isNaN(_gid)){
-        socket.emit('register error', 'invalid input');
-        return;
-      }
-
       if(!(_gid in games)) {
         socket.emit('register error', 'invalid game_id');
         return;
@@ -305,7 +300,10 @@ module.exports = function(server){
         socket.emit('start error', 'invalid view');
         return;
       }
-
+      if(!(gid in open_games)){
+        socket.emit('start error', 'game not open');
+        return;
+      }
       var game = open_games[gid];
       if(username != game['host']){
         socket.emit('start error', 'user not host');
@@ -459,7 +457,7 @@ module.exports = function(server){
             'players':players,
           });
       }
-      saveGame('active', game, gid);
+      saveGame('active', games[gid], gid);
     });
 
     socket.on('pass', function(pass){
@@ -519,7 +517,7 @@ module.exports = function(server){
             'players':players,
           });
       }
-      saveGame('active', game, gid);
+      saveGame('active', games[gid], gid);
     });
 
     socket.on('flip', function(flip){
@@ -595,7 +593,7 @@ module.exports = function(server){
             'players':players,
           });
       }
-      saveGame('active', game, gid);
+      saveGame('active', games[gid], gid);
     });
     
     socket.on('claim', function(guess){
@@ -662,9 +660,6 @@ module.exports = function(server){
         'openGameIds': listOpenGames()
       });
     })
-    socket.on('chat message', function(data){
-      socket.emit('cat response', ['yo', 'wass', 'up']);
-    });
 
     socket.on('disconnect', function(){
       if(view == 'game') {

@@ -168,6 +168,7 @@ window.onload = function() {
     if (myView == 'wait' && myGid == startInfo['gid']) {
       if(startInfo['usernames'].indexOf(myUsername) != -1) {
         socket.emit('register', startInfo['gid']);
+        console.log('yo');
       }
     }
   });
@@ -201,7 +202,7 @@ window.onload = function() {
 
   // Game Javascript
   $('#claim').click(function(){
-
+    
     // socket.emit('claim', )
   });
 
