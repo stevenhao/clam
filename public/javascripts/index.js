@@ -6,6 +6,7 @@ myUsername = null;
 print = console.log.bind(console);
 messageCounter = 0;
 
+
 window.onload = function() {
   socket = io();
   console.log('index.js is alive.');
@@ -360,7 +361,7 @@ renderGame = function() {
     tr.append($('<td>')).append($('<td>')).append($('<td>'));
     tr.append(td.append(button.append('Claim')));
     button.click(function() {
-      print('clam was clicked.');
+      actionClam();
     });
     return tr;
   }
@@ -598,5 +599,28 @@ actionFlip = function() {
       print('Flipping,', flipObj);
     }
   }
+}
+
+actionClam = function() {
+  var ok = true;
+  var guessObj = [];
+  for (var pid = 0; pid < 4; ++pid) {
+    var curList = [];
+    for (var idx = 0; idx < 6; ++idx) {
+      var cardEl = $('#' + cardId(pid, idx));
+      var notes = parseInt(cardEl.html());
+      var guess = 0;
+      guess = notes;
+      curList.push(guess);
+    }
+    guessObj.push(curList);
+  }
+  print('clam', guessObj);
+  if (!ok) {
+    print("clam is not ok.");
+  } else {
+    print("sending to server.");
+  }
+  socket.emit('clam', guessObj);
 }
 

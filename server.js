@@ -596,7 +596,7 @@ module.exports = function(server){
       saveGame('active', games[gid], gid);
     });
     
-    socket.on('claim', function(guess){
+    socket.on('clam', function(guess){
       // guess is in pid order [[1,2,3,4,5,6],[7,8,9,10,11,12],...]
       if (view != 'game'){
         socket.emit('claim error', 'invalid view');
