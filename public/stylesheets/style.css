@@ -1,148 +1,137 @@
 body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font:14px "Lucida Grande" sans-serif;
 }
-
 #game-view {
-  display: none;
+  display:none;
 }
-
-
 #buttons {
-  width: 100%;
-  height: 100%;
+  width:100%;
+  height:100%;
 }
-
 .game-cell {
-  height: 30px;
-  width: 100px;
-  text-align: center;
-  border-style: solid;
-  border-width: 1px;
+  height:30px;
+  width:100px;
+  text-align:center;
+  border-style:solid;
+  border-width:1px;
 }
-
 #board-layout {
-  z-index: 1;
+  z-index:1;
 }
-
 #lobby-view {
   position:fixed;
-  top: 50%;
-  left: 50%;
+  top:50%;
+  left:50%;
   width:30em;
   height:18em;
-  margin-top: -15em; /*set to a negative number 1/2 of your height*/
-  margin-left: -9em; /*set to a negative number 1/2 of your width*/
-  display: none;
+  margin-top:-15em; /*set to a negative number 1/2 of your height*/
+  margin-left:-9em; /*set to a negative number 1/2 of your width*/
+  display:none;
 }
-
 #login-view {
   position:fixed;
-  top: 50%;
-  left: 50%;
+  top:50%;
+  left:50%;
   width:30em;
   height:18em;
-  margin-top: -9em; /*set to a negative number 1/2 of your height*/
-  margin-left: -15em; /*set to a negative number 1/2 of your width*/
+  margin-top:-9em; /*set to a negative number 1/2 of your height*/
+  margin-left:-15em; /*set to a negative number 1/2 of your width*/
 }
-
 .open-game-cell {
-  height: 30px;
-  width: 100px;
-  text-align: center;
-  border-style: solid;
-  border-width: 1px;
+  height:30px;
+  width:100px;
+  text-align:center;
+  border-style:solid;
+  border-width:1px;
 }
-
 .players-list-cell {
-  height: 30px;
-  width: 150px;
-  text-align: center;
-  border-style: solid;
-  border-width: 1px;
+  height:30px;
+  width:150px;
+  text-align:center;
+  border-style:solid;
+  border-width:1px;
 }
-
 #start-game {
-  display: none;
+  display:none;
 }
-
 #status {
-  font-weight: bold;
-  font-size: 30pt;
+  font-weight:bold;
+  font-size:30pt;
 }
-
 #wait-view { 
   position:fixed;
-  top: 50%;
-  left: 50%;
+  top:50%;
+  left:50%;
   width:30em;
   height:18em;
-  margin-top: -15em; /*set to a negative number 1/2 of your height*/
-  margin-left: -9em; /*set to a negative number 1/2 of your width*/
-  display: none;
+  margin-top:-15em; /*set to a negative number 1/2 of your height*/
+  margin-left:-9em; /*set to a negative number 1/2 of your width*/
+  display:none;
 }
-
 .logout {
-  z-index: 2;
+  z-index:2;
 }
 
 /* button stuff */
 button {
-  cursor: pointer;
+  cursor:pointer;
 }
 
 /* card stuff */
 
 .card {
-  outline: none;
-  color: white;
-  text-align: center;
+  outline:none;
+  color:white;
+  text-align:center;
   width:80px;
   height:112px;
-  border: 1px solid;
-  border-radius: 10px;
-  cursor: pointer;
+  border:1px solid;
+  border-radius:10px;
+  cursor:pointer;
 }
-
 .card.black {
-  background-color: #3E4AE5;
+  background-color:#3E4AE5;
 }
-
 .card.red {
-  background-color: red;
+  background-color:red;
 }
-
 .card.selected {
   width:64px;
   height:106px;
-  border: solid green 3px;
+  border:solid green 3px;
 }
-
 .card.unknown {
-  -webkit-user-modify: read-write;
-  -moz-user-modify: read-write;
-  user-modify: read-write;
-  font-style: italic;
-  font-size: 10pt;
+  -webkit-user-modify:read-write;
+  -moz-user-modify:read-write;
+  user-modify:read-write;
+  font-style:italic;
+  font-size:10pt;
 }
-
 .card.known {
-  font-size: 25pt;
+  font-size:25pt;
 }
-
 .card.flipped {
-  font-weight: bold;
-  font-size: 40pt;
+  font-weight:bold;
+  font-size:40pt;
 }
 
 /* layout stuff */
 
-#game-layout td{
+#game-layout td {
   padding:0px;
 }
-#game-layout{
+#game-layout {
   border-spacing:10px 10px;
 }
-
+#game-view-left {
+  float:left;
+}
+#game-view-right {
+  float:left;
+  margin-left:50px;
+  margin-top:15px;
+  text-align:center;
+}
 .player-name {
   width:95px;
   text-align:right;
@@ -159,63 +148,54 @@ button {
   font-weight:bold;
   border-color:black;
   color:white;
-  cursor: pointer;
+  cursor:pointer;
 }
-.left-num{
+.left-num {
   margin-right:10px;
 }
-#select{
+#select {
   height:35px;
 }
-#submit{
+#submit {
   height:35px;
   width:170px;
   font-size:25px;
 }
-#filler{
+#filler {
   height:35px;
 }
-#claim{
+#claim {
   width:170px;
   height:35px;
   font-size:25px;
 }
-#notes{
-  margin-top:5px;
-  resize:none;
+#notes {
   width:450px;
   height:235px;
+  margin-top:5px;
+  resize:none;
   outline:0;
   font-size:20px;
-  border-color: black;
+  border-color:black;
 }
-#game-view-right{
-  float:left;
-  margin-left:50px;
-  margin-top:15px;
-  text-align:center;
-}
-#game-view-left{
-  float:left;
-}
-#history{
+#history {
   width:455px;
   height:235px;
-  border: 1px solid;
-  margin-top: 10px;
+  border:1px solid;
+  margin-top:10px;
   text-align:left;
-  max-height: 235px;
-  overflow-y: scroll;
+  max-height:235px;
+  overflow-y:scroll;
 }
-#history-text{
+#history-text {
   margin-left:10px;
 }
 #return-buttons {
   width:450px;
   margin-top:10px;
 }
-#return-buttons button{
-  width: 150px;
+#return-buttons button {
+  width:150px;
   height:35px;
-  font-size: 25px;
+  font-size:25px;
 }
