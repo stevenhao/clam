@@ -47,26 +47,27 @@ window.onload = function() {
       'num_ranks': 12,
     });
     socket.emit('logout');
+    socket.once('create success', function(gid) {
+      socket.emit('login', b);
+      socket.emit('join', gid);
+      socket.emit('add_user', 1);
+      socket.emit('logout');
 
-    socket.emit('login', b);
-    socket.emit('join', 1);
-    socket.emit('add_user', 1);
-    socket.emit('logout');
+      socket.emit('login', c);
+      socket.emit('join', gid);
+      socket.emit('add_user', 2);
+      socket.emit('logout');
 
-    socket.emit('login', c);
-    socket.emit('join', 1);
-    socket.emit('add_user', 2);
-    socket.emit('logout');
+      socket.emit('login', d);
+      socket.emit('join', gid);
+      socket.emit('add_user', 3);
+      socket.emit('logout');
 
-    socket.emit('login', d);
-    socket.emit('join', 1);
-    socket.emit('add_user', 3);
-    socket.emit('logout');
-
-    socket.emit('login', a);
-    socket.emit('join', 1);
-    socket.emit('add_user', 0);
-    socket.emit('start');
+      socket.emit('login', a);
+      socket.emit('join', gid);
+      socket.emit('add_user', 0);
+      socket.emit('start');
+    });
   });
 
   // Login Javascript
