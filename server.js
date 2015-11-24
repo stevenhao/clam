@@ -1,10 +1,32 @@
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : ''
+});
+
+loadGames();
+
 var games = {};
 var open_games = {};
 var finished_games = {};
 var count = 0;
+var APPLY_CHANGES_FREQ = 10;
+var DATABASE = 'clam';
+
+function randomString(length) {
+    chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var result = '';
+    for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
+    return result;
+}
+
 function newGameId(){
-  ++count;
-  return count;
+  var newId = randomString(6);
+  if(!(newId in listGames()) && !(newId in listOpenGames()) && !(newId in listFinishedGames())){
+    return newId;
+  }
+  return newGameId();
 }
 
 function listGames(){
@@ -14,6 +36,83 @@ function listGames(){
 function listOpenGames(){
   return Object.keys(open_games);
 }
+
+function listFinishedGames(){
+  return Object.keys(finished_games);
+}
+
+function loadGames(){
+  connection.connect();
+  connection.query('SELECT * FROM '+DATABASE+'.ACTIVE;', function(err, rows, fields){
+    if(err) throw err;
+    games = {}
+    for(row of rows){
+      var gid = row.gid;
+      var game_info = JSON.parse(row.game_info);
+      game_info.sockets = fillArray(null, game_info['usernames'].length);
+      games[gid] = game_info;
+    }
+  });
+
+  connection.query('SELECT * FROM '+DATABASE+'.OPEN;', function(err, rows, fields){
+    if(err) throw err;
+    open_games = {}
+    for(row of rows){
+      var gid = row.gid;
+      var game_info = JSON.parse(row.game_info);
+      game_info.sockets = [];
+      open_games[gid] = game_info;
+    }
+  });
+
+  connection.query('SELECT * FROM 'DATABASE+'.FINISHED;', function(err, rows, fields){
+    if(err) throw err;
+    finished_games = {}
+    for(row of rows){
+      var gid = row.gid;
+      var game_info = JSON.parse(row.game_info);
+      finished_games[gid] = game_info;
+    }
+  });
+  connection.end();
+}
+
+function saveGame(table, game, gid){
+  // table can be "active", "open", or "finished"
+  connection.connect();
+  game = JSON.stringify({
+    'game_info': game.game_info,
+    'true_cards': game.true_cards,
+    'public_gs': game.public_gs,
+    'private_gs': game.private_gs,
+    'usernames': game.usernames,
+    'host': game.host
+  });
+
+  connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result){
+    if(err) throw err;
+    if(result['COUNT(*)'] == 0){
+      connection.query("INSERT INTO "+DATABASE+"."+table+"\n VALUES ('"+gid+"', '"+game+"');", function(err, result){
+        if(err) throw err;
+      });
+    }else{
+      connection.query("UPDATE "+DATABASE+"."+table+"\n SET game_info='"+game+"'\n WHERE gid='"+gid+"';"), function(err, result){
+        if(err) throw err;
+      });
+    }
+  });
+  connection.end();
+}
+
+function deleteGame(table, gid){
+  // table can be "active", "open", or "finished"
+  connection.connect();
+  connection.query("DELETE FROM "+DATABASE+"."+table+"\nWHERE gid='"+gid+"';", function(err, result)){
+    if(err) throw err;
+  }
+  connection.end();
+}
+
 module.exports = function(server){
   var io = require('socket.io')(server);
 
@@ -83,6 +182,7 @@ module.exports = function(server){
       });
 
       socket.emit('create success', id);
+      saveGame('open', game, id);
     });
 
     socket.on('join', function(_gid){
@@ -231,6 +331,8 @@ module.exports = function(server){
           'usernames': game['usernames']
         });
       }
+      deleteGame('open', gid);
+      saveGame('active', game, gid);
     });
 
     socket.on('wait', function(){
@@ -360,6 +462,7 @@ module.exports = function(server){
             'players':players,
           });
       }
+      saveGame('active', game, gid);
     });
 
     socket.on('pass', function(pass){
@@ -419,6 +522,7 @@ module.exports = function(server){
             'players':players,
           });
       }
+      saveGame('active', game, gid);
     });
 
     socket.on('flip', function(flip){
@@ -494,6 +598,7 @@ module.exports = function(server){
             'players':players,
           });
       }
+      saveGame('active', game, gid);
     });
     
     socket.on('claim', function(guess){
@@ -539,7 +644,10 @@ module.exports = function(server){
       }
 
       finished_games[gid] = games[gid];
+      delete finished_games[gid]['sockets'];
       delete games[gid];
+      deleteGame('active', gid);
+      saveGame('finished', game, gid);
     });
 
     socket.on('game_back', function(){
