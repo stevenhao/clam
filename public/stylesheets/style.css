@@ -159,16 +159,13 @@ body {
 }
 #select{
   height:35px;
-  /*display:none;*/
 }
 #submit{
   height:35px;
   width:170px;
   font-size:25px;
-  display:none;
 }
 #filler{
-  display:none;
   height:35px;
 }
 #claim{

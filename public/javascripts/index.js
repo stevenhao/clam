@@ -497,6 +497,30 @@ updateObjects = function(gameInfo) {
     }
   }
 
+  updateButtonVisibility = function(select, submit, filler) {
+    for (var el of [select, submit, filler]) {
+      el.attr('hidden', '1');
+    }
+
+    var turn = parseInt(gameInfo.public.turn);
+    var phase = gameInfo.public.phase;
+    var pid = turn;
+    if (phase == 'pass') {
+      pid = (pid + 2) % 4;
+    }
+
+    print ('updating button visibility', pid, phase);
+    if (pid == myPid) {
+      if (phase == 'pass' || phase == 'flip') {
+        submit.removeAttr('hidden');
+      } else if (phase == 'guess') {
+        select.removeAttr('hidden');
+      }
+    } else {
+      filler.removeAttr('hidden');
+    }
+  }
+
   for (var pid = 0; pid < 4; ++pid) {
     // fill names
     var nameEl = $('#' + nameId(pid));    
@@ -511,7 +535,7 @@ updateObjects = function(gameInfo) {
 
   updateStatusEl($('#status'));
   updateHistoryEl($('#history-text'));
-
+  updateButtonVisibility($('#select'), $('#submit'), $('#filler'));
 }
 
 updateGame = function(_gameInfo) {
