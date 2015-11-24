@@ -232,12 +232,13 @@ renderLobby = function(games, open_games) {
   }
 
   $('.game-cell').click(function(){
-    var gameId = parseInt($(this).html());
+    var gameId = $(this).html();
     socket.emit('register', gameId);
   });
 
   $('.open-game-cell').click(function(){
-    var gameId = parseInt($(this).html());
+    var gameId = $(this).html();
+
     socket.emit('join', gameId);
   });
 }

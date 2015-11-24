@@ -5,14 +5,14 @@ var connection = mysql.createConnection({
   password : ''
 });
 
-loadGames();
-
 var games = {};
 var open_games = {};
 var finished_games = {};
 var count = 0;
 var APPLY_CHANGES_FREQ = 10;
 var DATABASE = 'clam';
+
+loadGames();
 
 function randomString(length) {
     chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -65,7 +65,7 @@ function loadGames(){
     }
   });
 
-  connection.query('SELECT * FROM 'DATABASE+'.FINISHED;', function(err, rows, fields){
+  connection.query('SELECT * FROM '+DATABASE+'.FINISHED;', function(err, rows, fields){
     if(err) throw err;
     finished_games = {}
     for(row of rows){
@@ -74,12 +74,10 @@ function loadGames(){
       finished_games[gid] = game_info;
     }
   });
-  connection.end();
 }
 
 function saveGame(table, game, gid){
   // table can be "active", "open", or "finished"
-  connection.connect();
   game = JSON.stringify({
     'game_info': game.game_info,
     'true_cards': game.true_cards,
@@ -91,26 +89,25 @@ function saveGame(table, game, gid){
 
   connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result){
     if(err) throw err;
-    if(result['COUNT(*)'] == 0){
+    console.log(result);
+    if(result[0]['COUNT(*)'] == 0){
       connection.query("INSERT INTO "+DATABASE+"."+table+"\n VALUES ('"+gid+"', '"+game+"');", function(err, result){
         if(err) throw err;
       });
     }else{
-      connection.query("UPDATE "+DATABASE+"."+table+"\n SET game_info='"+game+"'\n WHERE gid='"+gid+"';"), function(err, result){
+      console.log('what up4');
+      connection.query("UPDATE "+DATABASE+"."+table+"\n SET game_info='"+game+"'\n WHERE gid='"+gid+"';", function(err, result){
         if(err) throw err;
       });
     }
   });
-  connection.end();
 }
 
 function deleteGame(table, gid){
   // table can be "active", "open", or "finished"
-  connection.connect();
-  connection.query("DELETE FROM "+DATABASE+"."+table+"\nWHERE gid='"+gid+"';", function(err, result)){
+  connection.query("DELETE FROM "+DATABASE+"."+table+"\nWHERE gid='"+gid+"';", function(err, result){
     if(err) throw err;
-  }
-  connection.end();
+  });
 }
 
 module.exports = function(server){
