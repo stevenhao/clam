@@ -94,6 +94,7 @@ window.onload = function() {
 
     myGid = _gameInfo['gid'];
     myPid = _gameInfo['pid'];
+    messageCounter = 0;
     renderGame(_gameInfo);
     $('#'+myView+'-view').css({'display':'none'});
     $('#game-view').css({'display':'block'});
@@ -211,45 +212,6 @@ window.onload = function() {
     socket.emit('game_back');
     return false;
   });
-
-  $('#goform').submit(function() {
-    // pass, guess, flip
-    try {
-    if (selectedCard == null) {
-      print('WHAT CARD DUDE');
-      return false;
-    }
-
-    if (myPid != getNextAction()) {
-      print('NOT YOUR TURN BRO!');
-      return false;
-    }
-
-    var phase = gameInfo.public.phase;
-    if (phase == 'pass') {
-      if (selectedCard.pid != myPid) {
-        print('PASS YOUR CARD DUDE');
-        return false;
-      }
-      socket.emit('pass', {'card': selectedCard.idx});
-    } else if (phase == 'guess') {
-      var rank = $('#guess').val();
-      var guessObj = {'target_id': selectedCard.pid, 'target_card': selectedCard.idx, 'rank': rank};
-      socket.emit('guess', guessObj);
-    } else if (phase == 'flip') {
-      if (selectedCard.pid != myPid) {
-        print('FLIP YOUR CARD DUDE');
-        return false;
-      }
-      socket.emit('flip', {'card': selectedCard.idx});
-    }
-  }
-    catch(e) {
-      print('exception', e);
-    }
-
-    return false;
-  });
   
   // updateGameList();
 };
@@ -342,7 +304,7 @@ renderGame = function(gameInfo) {
     handEl.append(nameEl);
 
     for (var idx = 0; idx < 6; ++idx) {
-      var cardEl = createCardEl().attr('id', cardId(pid, idx));
+      var cardEl = createCardEl().attr('id', cardId(pid, idx)).attr('pid', pid).attr('idx', idx);
       cardEl.click(function() {
         selectCard($(this));
       });
@@ -368,7 +330,8 @@ renderGame = function(gameInfo) {
 
         div.attr('value', j);
         div.click(function() {
-          print('clicked', $(this).attr('value'));
+          // print('clicked', $(this).attr('value'));
+          actionGuess($(this).attr('value'));
         });
       }
     }
@@ -383,6 +346,12 @@ renderGame = function(gameInfo) {
     tr.append(td.append(button.append('Submit')));
     button.click(function() {
       print('submit was clicked.');
+      var phase = gameInfo.public.phase;
+      if (phase == 'pass') {
+        actionPass();
+      } else if (phase == 'flip') {
+        actionFlip();
+      }
     });
     return tr;
   }
@@ -506,7 +475,7 @@ updateObjects = function(gameInfo) {
     var phase = gameInfo.public.phase;
     var pid = turn;
     if (phase == 'pass') {
-      pid = (pid + 2) % 4;
+      pid = partner(turn);
     }
 
     print ('updating button visibility', pid, phase);
@@ -540,7 +509,7 @@ updateObjects = function(gameInfo) {
 
 updateGame = function(_gameInfo) {
   gameInfo = _gameInfo;
-  updateObjects();
+  updateObjects(gameInfo);
 }
 
 selectCard = function(card) {
@@ -557,3 +526,81 @@ selectCard = function(card) {
     selectedCard = card;
   }
 }
+
+
+
+  // $('#goform').submit(function() {
+  //   // pass, guess, flip
+  //   try {
+  //   if (selectedCard == null) {
+  //     print('WHAT CARD DUDE');
+  //     return false;
+  //   }
+
+  //   if (myPid != getNextAction()) {
+  //     print('NOT YOUR TURN BRO!');
+  //     return false;
+  //   }
+
+  //   var phase = gameInfo.public.phase;
+  //   if (phase == 'pass') {
+  //     if (selectedCard.pid != myPid) {
+  //       print('PASS YOUR CARD DUDE');
+  //       return false;
+  //     }
+  //     socket.emit('pass', {'card': selectedCard.idx});
+  //   } else if (phase == 'guess') {
+  //     var rank = $('#guess').val();
+  //     var guessObj = {'target_id': selectedCard.pid, 'target_card': selectedCard.idx, 'rank': rank};
+  //     socket.emit('guess', guessObj);
+  //   } else if (phase == 'flip') {
+  //     if (selectedCard.pid != myPid) {
+  //       print('FLIP YOUR CARD DUDE');
+  //       return false;
+  //     }
+  //     socket.emit('flip', {'card': selectedCard.idx});
+  //   }
+  // }
+  //   catch(e) {
+  //     print('exception', e);
+  //   }
+
+  //   return false;
+  // });
+
+actionGuess = function(rank) {
+  if (selectedCard != null) {
+    var pid = parseInt(selectedCard.attr('pid'));
+    var idx = parseInt(selectedCard.attr('idx'));
+    if (pid != myPid && pid != partner(myPid)) {
+      var guessObj = {'target_id': pid, 'target_card': idx, 'rank': rank};
+      socket.emit('guess', guessObj);
+      print('Guessing,', guessObj);
+    }
+  }
+}
+
+actionPass = function() {
+  if (selectedCard != null) {
+    var pid = parseInt(selectedCard.attr('pid'));
+    var idx = parseInt(selectedCard.attr('idx'));
+    if (pid == myPid) {
+      var passObj = {'card': idx};
+      socket.emit('pass', passObj);
+      print('Passing,', passObj);
+    }
+  }
+}
+
+actionFlip = function() {
+  if (selectedCard != null) {
+    var pid = parseInt(selectedCard.attr('pid'));
+    var idx = parseInt(selectedCard.attr('idx'));
+    if (pid == myPid) {
+      var flipObj = {'card': idx};
+      socket.emit('flip', flipObj);
+      print('Flipping,', flipObj);
+    }
+  }
+}
+
