@@ -222,11 +222,15 @@ renderLobby = function(games, open_games) {
   $('#game-ids').html('');
   $('#open-game-ids').html('');
   for(game of games) {
-    $('#game-ids').append('<tr><td class="game-cell">'+game+'</td></tr>');
+    var tr = $('<tr>');
+    var td = $('<td>').addClass('game-cell').addClass('clickable');
+    $('#game-ids').append(tr.append(td.append(game)));
   }
 
   for(game of open_games) {
-    $('#open-game-ids').append('<tr><td class="open-game-cell">'+game+'</td></tr>');
+    var tr = $('<tr>');
+    var td = $('<td>').addClass('open-game-cell').addClass('clickable');
+    $('#open-game-ids').append(tr.append(td.append(game)));
   }
 
   $('.game-cell').click(function(){
@@ -293,7 +297,7 @@ renderGame = function() {
   }
 
   createCardEl = function() {
-    var td = $('<td>').addClass('card');
+    var td = $('<td>').addClass('card').addClass('clickable');
     return td;
   }
 

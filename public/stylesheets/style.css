@@ -77,6 +77,9 @@ button {
   cursor:pointer;
 }
 
+.clickable{
+  cursor:pointer;
+}
 /* card stuff */
 
 .card {
@@ -87,7 +90,6 @@ button {
   height:112px;
   border:1px solid;
   border-radius:10px;
-  cursor:pointer;
 }
 .card.black {
   background-color:#3E4AE5;
