@@ -4,6 +4,19 @@ var connection = mysql.createConnection({
   user     : 'root',
   password : ''
 });
+  
+initDatabase = function() { // in case tables don't exist yet
+  var commands = ['create database if not exists clam;',
+  'create table if not exists clam.open(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.active(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.finished(gid varchar(10), game_info varchar(10000));'];
+  for (var command of commands) {
+    connection.query(command);
+  }
+}
+
+connection.connect();
+initDatabase();
 
 var games = {};
 var open_games = {};
@@ -42,7 +55,7 @@ function listFinishedGames(){
 }
 
 function loadGames(){
-  connection.connect();
+
   connection.query('SELECT * FROM '+DATABASE+'.ACTIVE;', function(err, rows, fields){
     if(err) throw err;
     games = {}
