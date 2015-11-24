@@ -87,15 +87,15 @@ window.onload = function() {
 
   // Lobby Listeners
   socket.on('register success', function(_gameInfo) {
-    if(myView != 'lobby' && !(myView == 'wait' && _gameInfo['gid'] == myGid))
+    gameInfo = _gameInfo;
+    if(myView != 'lobby' && !(myView == 'wait' && gameInfo['gid'] == myGid))
       return;
 
-    console.log('register success,', _gameInfo);
-
-    myGid = _gameInfo['gid'];
-    myPid = _gameInfo['pid'];
+    console.log('register success,', gameInfo);
+    myGid = gameInfo['gid'];
+    myPid = gameInfo['pid'];
     messageCounter = 0;
-    renderGame(_gameInfo);
+    renderGame();
     $('#'+myView+'-view').css({'display':'none'});
     $('#game-view').css({'display':'block'});
 
@@ -181,8 +181,9 @@ window.onload = function() {
   // Game Listeners
   for(game_event of ['pass success', 'guess success', 'flip success']) {
     socket.on(game_event, function(_gameInfo) {
-      if(myView != 'game' || myGid != _gameInfo['gid']) {
-        updateGame(_gameInfo);
+      gameInfo = _gameInfo;
+      if(myView == 'game') {
+        updateGame();
       }
     });
   }
@@ -198,12 +199,6 @@ window.onload = function() {
     
     $('#game-view').css({'display':'none'});
     $('#lobby-view').css({'display':'block'});
-  });
-
-  // Game Javascript
-  $('#claim').click(function(){
-    
-    // socket.emit('claim', )
   });
 
   $('#game-back').click(function(){
@@ -248,11 +243,11 @@ updateLobby = function(games, open_games) {
   renderLobby(games, open_games);
 }
 
-renderWait = function(gameInfo) {
+renderWait = function(joinInfo) {
   $('#players-list').html('');
-  $('#game-id').html('Game Id: '+gameInfo['gid'])
-  $('#host').html('Host: ' + gameInfo['host']);
-  for (var i = 0; i < gameInfo['usernames'].length; ++i)
+  $('#game-id').html('Game Id: '+joinInfo.gid)
+  $('#host').html('Host: ' + joinInfo.host);
+  for (var i = 0; i < joinInfo.usernames.length; ++i)
     $('#players-list').append('<tr><td class="players-list-cell" id="players-list-cell-'+i+'"> </td></tr>');
   
   $('.players-list-cell').click(function(){
@@ -261,21 +256,21 @@ renderWait = function(gameInfo) {
     socket.emit('add_user', pid);
   });
 
-  updateWait(gameInfo);
+  updateWait(joinInfo);
 }
 
-updateWait = function(gameInfo){
+updateWait = function(joinInfo){
   var filled = true;
-  for (var i = 0; i < gameInfo['usernames'].length; ++i) {
-    if (gameInfo['usernames'][i] == null){
+  for (var i = 0; i < joinInfo.usernames.length; ++i) {
+    if (joinInfo.usernames[i] == null){
       $('#players-list-cell-'+i).html('Join as Player '+(i+1));
       filled = false;
     } else{
-      $('#players-list-cell-'+i).html(gameInfo['usernames'][i]);
+      $('#players-list-cell-'+i).html(joinInfo.usernames[i]);
     }
   }
 
-  if (myUsername == gameInfo['host'] && filled)
+  if (myUsername == joinInfo.host && filled)
     $('#start-game').css({'display':'block'});
   else
     $('#start-game').css({'display':'none'});
@@ -289,7 +284,7 @@ nameId = function(pid) {
   return 'nameTag-' + pid;
 }
 
-renderGame = function(gameInfo) {
+renderGame = function() {
   createNameEl = function() {
     var td = $('<td>').addClass('player-name');
     return td;
@@ -347,8 +342,8 @@ renderGame = function(gameInfo) {
     tr.append($('<td>')).append($('<td>')).append($('<td>'));
     tr.append(td.append(button.append('Submit')));
     button.click(function() {
-      print('submit was clicked.');
       var phase = gameInfo.public.phase;
+      print('submit was clicked, phase=', phase);
       if (phase == 'pass') {
         actionPass();
       } else if (phase == 'flip') {
@@ -398,10 +393,10 @@ renderGame = function(gameInfo) {
 
   $('#history-text').empty();
 
-  updateObjects(gameInfo);
+  updateObjects();
 }
 
-updateObjects = function(gameInfo) {
+updateObjects = function() {
   updateCardEl = function(cardEl) {
     var cardInfo = gameInfo.private[pid][idx];
 
@@ -509,9 +504,8 @@ updateObjects = function(gameInfo) {
   updateButtonVisibility($('#select'), $('#submit'), $('#filler'));
 }
 
-updateGame = function(_gameInfo) {
-  gameInfo = _gameInfo;
-  updateObjects(gameInfo);
+updateGame = function() {
+  updateObjects();
 }
 
 selectCard = function(card) {
