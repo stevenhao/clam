@@ -373,6 +373,7 @@ renderGame = function() {
       if ($(this).val() == '') {
         $(this).val('...');
       }
+      updateClamOpacity();
     });
     return noteEl;
   }
@@ -612,8 +613,7 @@ updateButtonOpacity = function() {
     pid = partner(turn);
   }
 
-  var select = $('#select'), submit = $('#submit'), clam = $('#clam');
-
+  var select = $('#select'), submit = $('#submit');
   if (pid == myPid) {
     if (phase == 'pass') {
       if (canPass()) {
@@ -646,6 +646,11 @@ updateButtonOpacity = function() {
       });
     }
   }
+  updateClamOpacity();
+}
+
+updateClamOpacity = function() {
+  var clam = $('#clam');
 
   if (canClam()) {
     clam.removeAttr('disabled');
