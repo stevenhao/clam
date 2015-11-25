@@ -649,7 +649,7 @@ updateButtonOpacity = function() {
 
   if (canClam()) {
     clam.removeAttr('disabled');
-    clam.removeClass('disabled;')
+    clam.removeClass('disabled')
   } else {
     clam.attr('disabled', 1);
     clam.addClass('disabled');
