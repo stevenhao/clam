@@ -5,7 +5,7 @@ selectedCard = null;
 myUsername = null;
 print = console.log.bind(console);
 messageCounter = 0;
-
+timeoutId = 0;
 
 window.onload = function() {
   socket = io();
@@ -358,8 +358,26 @@ renderGame = function() {
     return td;
   }
 
+  createNoteEl = function() {
+    var noteEl = $('<textarea>').addClass('notes').html('...');
+    noteEl.focus(function() {
+      print('handler for focus called');
+      if ($(this).html() == '...') {
+        $(this).html('');
+      }
+    });
+    noteEl.blur(function() {
+      print('handler for blur called');
+      if ($(this).html() == '') {
+        $(this).html('...');
+      }
+    });
+    return noteEl;
+  }
+
   createCardEl = function() {
     var td = $('<td>').addClass('card').addClass('clickable');
+    td.append(createNoteEl());
     return td;
   }
 
@@ -370,7 +388,13 @@ renderGame = function() {
 
     for (var idx = 0; idx < 6; ++idx) {
       var cardEl = createCardEl().attr('id', cardId(pid, idx)).attr('pid', pid).attr('idx', idx);
-      cardEl.click(function() {
+      cardEl.dblclick(function(e) {
+        print('handler for doubleclick called');
+        selectCard($(this));
+        return true;
+      });
+
+      cardEl.on('taphold', function() {
         selectCard($(this));
       });
       handEl.append(cardEl);
@@ -486,9 +510,6 @@ updateObjects = function() {
     } else {
       cardEl.removeClass('known');
       cardEl.addClass('unknown');
-      if (cardEl.html().length == 0) {
-        cardEl.html('?');
-      }
     }
 
     // set card flipped
