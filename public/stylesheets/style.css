@@ -108,15 +108,9 @@ button, .clickable {
   cursor:pointer;
 }
 
-<<<<<<< HEAD
-=======
-.clickable{
-  cursor:pointer;
-}
 .unclickable{
   cursor:default;
 }
->>>>>>> Updated Lobby and Wait Room UI
 /* card stuff */
 
 .card {
