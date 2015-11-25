@@ -171,6 +171,7 @@ button, .clickable {
   padding:0px;
 }
 #game-layout {
+  border-collapse:separate;
   border-spacing:10px 10px;
 }
 #game-view-left {
