@@ -1,114 +1,94 @@
-body {
+body{
   font:14px "Lucida Grande" sans-serif;
 }
 
+/* view hiding stuff */
+#game-view, #lobby-view, #lobby-view-nav, #wait-view-nav, #game-view-nav{
+  display:none;
+}
 .navbar{
   z-index:3;
 }
-
-#game-view {
-  display:none;
-}
-#buttons {
+#buttons{
   width:100%;
   height:100%;
 }
-#board-layout {
+#board-layout{
   z-index:1;
 }
-#lobby-view {
-  display:none;
-}
-#login-view {
-}
-#lobby-view-nav{
-  display:none;
-}
-#wait-view-nav{
-  display:none;
-}
-#game-view-nav{
-  display:none;
-}
-.form-signin {
-  max-width: 330px;
-  padding: 25px;
+.form-signin{
+  max-width:330px;
+  padding:25px;
   margin:auto;
 }
-.form-signin .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
+.form-signin .form-control{
+  position:relative;
+  height:auto;
+  -webkit-box-sizing:border-box;
+     -moz-box-sizing:border-box;
+          box-sizing:border-box;
+  padding:10px;
+  font-size:16px;
 }
-.form-signin .form-control:focus {
-  z-index: 2;
+.form-signin .form-control:focus{
+  z-index:2;
 }
-
-#new-username, #new-password, #new-confirm-password, #register {
-  margin-bottom: 5px;
+#new-username, #new-password, #new-confirm-password, #register{
+  margin-bottom:5px;
 }
-
 .hero-unit{
-  background-color: #eeeeee;
+  background-color:#eeeeee;
   max-width:95%;
-  margin: auto;
+  margin:auto;
   border-radius:5px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top:10px;
+  margin-bottom:10px;
   text-align:left;
   padding-left:60px;
   padding-right:60px;
   padding-bottom:50px;
   font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-weight: 200;
+  font-weight:200;
   line-height:30px;
   font-size:18px;
 }
-
-.message {
+.message{
   max-width:95%;
-  margin: auto;
+  margin:auto;
   border-radius:5px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top:10px;
+  margin-bottom:10px;
   background-color:#dff0d8;
-  border: 1px solid;
-  border-color: #d6e9c6;
+  border:1px solid;
+  border-color:#d6e9c6;
   padding-left:10px;
   padding-top:10px;
   padding-bottom:10px;
   color:#468847;
 }
-
 .scroll-table{
   max-height:400px;
   overflow:auto;
 }
-
-#start-game {
+#start-game{
   display:none;
 }
-#status {
+#status{
   font-weight:bold;
   font-size:30pt;
 }
-#wait-view { 
+#wait-view{ 
   display:none;
 }
-.logout {
+.logout{
   z-index:2;
 }
 
 /* button stuff */
-button, .clickable {
+button, .clickable{
   cursor:pointer;
 }
-
-.unclickable{
+.unclickable, .disabled{
   cursor:default;
 }
 .disabled{
@@ -116,7 +96,7 @@ button, .clickable {
 }
 /* card stuff */
 
-.card {
+.card{
   outline:none;
   color:white;
   text-align:center;
@@ -124,40 +104,34 @@ button, .clickable {
   height:112px;
   border:1px solid;
   border-radius:10px;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  -moz-user-select:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
 }
-.card.black {
+.card.black{
   background-color:#3E4AE5;
 }
-.card.red {
+.card.red{
   background-color:red;
 }
-.card.selected {
+.card.selected{
   width:64px;
   height:106px;
   border:solid green 3px;
 }
-.card.unknown {
-/*  -webkit-user-modify:read-write;
-  -moz-user-modify:read-write;
-  user-modify:read-write;
-*/  
-}
-.card.known {
+.card.known{
   font-size:25pt;
 }
-.card.flipped {
+.card.flipped{
   font-weight:bold;
   font-size:40pt;
 }
 
 /* notes stuff */
-.notes {
-  color: white; background-color: transparent;
+.card .notes{
+  color:white; background-color:transparent;
   font-style:italic;
   font-size:10pt;
   border:none;
@@ -168,29 +142,15 @@ button, .clickable {
   height:75%;
 }
 
-/* layout stuff */
-
-#game-layout td {
-  padding:0px;
+/* action button stuff */
+#select, #submit, #filler, #clam{
+  height:35px;
 }
-#game-layout {
-  border-collapse:separate;
-  border-spacing:10px 10px;
+#submit, #clam{
+  width:170px;
+  font-size:25px;
 }
-#game-view-left {
-  float:left;
-}
-#game-view-right {
-  float:left;
-  margin-left:50px;
-  margin-top:15px;
-  text-align:center;
-}
-.player-name {
-  width:95px;
-  text-align:right;
-}
-.num {
+.num{
   width:33px;
   height:33px;
   display:inline-block;
@@ -204,35 +164,32 @@ button, .clickable {
   color:white;
   cursor:pointer;
 }
-.left-num {
+.left-num{
   margin-right:10px;
 }
-#select {
-  height:35px;
+
+/* layout stuff */
+#game-layout td{
+  padding:0px;
 }
-#submit {
-  height:35px;
-  width:170px;
-  font-size:25px;
+#game-layout{
+  border-collapse:separate;
+  border-spacing:10px 10px;
 }
-#filler {
-  height:35px;
+#game-view-left{
+  float:left;
 }
-#clam {
-  width:170px;
-  height:35px;
-  font-size:25px;
+#game-view-right{
+  float:left;
+  margin-left:50px;
+  margin-top:15px;
+  text-align:center;
 }
-#notes {
-  width:450px;
-  height:235px;
-  margin-top:5px;
-  resize:none;
-  outline:0;
-  font-size:20px;
-  border-color:black;
+.player-name{
+  width:95px;
+  text-align:right;
 }
-#history {
+#history{
   width:455px;
   height:235px;
   border:1px solid;
@@ -241,14 +198,14 @@ button, .clickable {
   max-height:235px;
   overflow-y:scroll;
 }
-#history-text {
+#history-text{
   margin-left:10px;
 }
-#return-buttons {
+#return-buttons{
   width:450px;
   margin-top:10px;
 }
-#return-buttons button {
+#return-buttons button{
   width:150px;
   height:35px;
   font-size:25px;
