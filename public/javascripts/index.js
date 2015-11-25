@@ -215,6 +215,7 @@ window.onload = function() {
       if(myView == 'game') {
         updateGame();
       }
+      deselect();
     });
   }
 
@@ -565,6 +566,11 @@ updateObjects = function() {
     if (pid == myPid) {
       if (phase == 'pass' || phase == 'flip') {
         submit.removeAttr('hidden');
+        if (phase == 'pass') {
+          submit.html('Pass');
+        } else {
+          submit.html('Flip');
+        }
       } else if (phase == 'guess') {
         select.removeAttr('hidden');
       }
@@ -609,6 +615,13 @@ selectCard = function(card) {
   }
 }
 
+deselect = function() {
+  if (selectedCard != null) {
+    selectedCard.removeClass('selected');
+    selectedCard = null;
+  }
+}
+
 actionGuess = function(rank) {
   if (selectedCard != null) {
     var pid = parseInt(selectedCard.attr('pid'));
@@ -630,6 +643,7 @@ actionPass = function() {
       socket.emit('pass', passObj);
       print('Passing,', passObj);
     }
+    deselect();
   }
 }
 
