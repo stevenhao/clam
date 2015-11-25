@@ -111,6 +111,9 @@ button, .clickable {
 .unclickable{
   cursor:default;
 }
+.disabled{
+  opacity:0.2;
+}
 /* card stuff */
 
 .card {

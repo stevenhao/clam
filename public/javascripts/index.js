@@ -563,13 +563,12 @@ updateObjects = function() {
 
     print ('updating button visibility', pid, phase);
     if (pid == myPid) {
-      if (phase == 'pass' || phase == 'flip') {
+      if (phase == 'pass') {
         submit.removeAttr('hidden');
-        if (phase == 'pass') {
-          submit.html('Pass');
-        } else {
-          submit.html('Flip');
-        }
+        submit.html('Pass');
+      } else if (phase == 'flip') {
+        submit.removeAttr('hidden');
+        submit.html('Flip');
       } else if (phase == 'guess') {
         select.removeAttr('hidden');
       }
@@ -593,6 +592,59 @@ updateObjects = function() {
   updateStatusEl($('#status'));
   updateHistoryEl($('#history-text'));
   updateButtonVisibility($('#select'), $('#submit'), $('#filler'));
+  updateButtonOpacity();
+}
+
+updateButtonOpacity = function() {
+  var turn = parseInt(gameInfo.public.turn);
+  var phase = gameInfo.public.phase;
+  var pid = turn;
+  if (phase == 'pass') {
+    pid = partner(turn);
+  }
+
+  var select = $('#select'), submit = $('#submit'), clam = $('#clam');
+
+  if (pid == myPid) {
+    if (phase == 'pass') {
+      if (canPass()) {
+        print('can pass, enabling button.');
+        submit.removeAttr('disabled');
+        submit.removeClass('disabled');
+      } else {
+        submit.attr('disabled', '1');
+        submit.addClass('disabled');
+      }
+    } else if (phase == 'flip') {
+      if (canFlip()) {
+        print('can pass, enabling button.');
+        submit.removeAttr('disabled');
+        submit.removeClass('disabled');
+      } else {
+        submit.attr('disabled', '1');
+        submit.addClass('disabled');
+
+      }
+    } else if (phase == 'guess') {
+      $('.num').each(function() {
+        var el = $(this);
+        var rank = el.attr('value');
+        if (canGuess(rank)) {
+          el.removeClass('disabled');
+        } else {
+          el.addClass('disabled');
+        }
+      });
+    }
+  }
+
+  if (canClam()) {
+    clam.removeAttr('disabled');
+    clam.removeClass('disabled;')
+  } else {
+    clam.attr('disabled', 1);
+    clam.addClass('disabled');
+  }
 }
 
 updateGame = function() {
@@ -612,6 +664,7 @@ selectCard = function(card) {
     card.addClass('selected');
     selectedCard = card;
   }
+  updateButtonOpacity();
 }
 
 deselect = function() {
@@ -619,6 +672,65 @@ deselect = function() {
     selectedCard.removeClass('selected');
     selectedCard = null;
   }
+  updateButtonOpacity();
+}
+
+canGuess = function(rank) {
+  getColor = function(cardEl) {
+    if (cardEl.hasClass('red')) {
+      return 1;
+    } else {
+      return 2;
+    }
+  }
+  if (selectedCard != null) {
+    var pid = parseInt(selectedCard.attr('pid'));
+    if (pid != myPid && pid != partner(myPid)) {
+      var color = getColor(selectedCard);
+      var ok = true;
+      $('.card.flipped').each(function() {
+        var el = $(this);
+        if (el.html() == rank && getColor(el) == color) {
+          ok = false;
+        }
+      });
+      return ok;
+    }
+  }
+}
+
+canPass = function() {
+  if (selectedCard != null) {
+    var pid = parseInt(selectedCard.attr('pid'));
+    return pid == myPid;
+  }
+}
+
+canFlip = function() {
+  if (selectedCard != null) {
+    var pid = parseInt(selectedCard.attr('pid'));
+    return pid == myPid;
+  }
+}
+
+canClam = function() {
+  var ok = true;
+  for (var pid = 0; pid < 4; ++pid) {
+    for (var idx = 0; idx < 6; ++idx) {
+      var cardEl = $('#' + cardId(pid, idx));
+      var guess = 0;
+      if (cardEl.hasClass('known')) {
+        guess = parseInt(cardEl.html());
+      } else {
+        var notesEl = $('textarea', cardEl);
+        guess = parseInt(notesEl.html());
+      }
+      if (isNaN(guess)) {
+        ok = false;
+      }
+    }
+  }
+  return ok;
 }
 
 actionGuess = function(rank) {
