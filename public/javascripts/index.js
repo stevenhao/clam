@@ -672,7 +672,7 @@ actionClam = function() {
         var notesEl = $('textarea', cardEl);
         guess = parseInt(notesEl.html());
       }
-      if (guess == NaN) {
+      if (isNaN(guess)) {
         ok = false;
       }
       curList.push(guess);
