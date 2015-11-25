@@ -710,7 +710,7 @@ module.exports = function(server){
       // guess is in pid order [[1,2,3,4,5,6],[7,8,9,10,11,12],...]
       print('received clam', guess);
       if (view != 'game'){
-        socket.emit('claim error', 'invalid view');
+        socket.emit('clam error', 'invalid view');
         return;
       }
       if (public_gs.phase == 'over') {
@@ -733,19 +733,19 @@ module.exports = function(server){
       print('winner=', winner);
       var message = "";
       if(winner == pid%2){
-        message = players[pid]+' claims successfully!\n'+players[pid]+' and '+players[(pid+2)%num_players]+' WIN :)';
+        message = players[pid]+' clams successfully!\n'+players[pid]+' and '+players[(pid+2)%num_players]+' WIN :)';
       }else{
-        message = players[pid]+' claims incorrectly!\n'+players[(pid+1)%num_players]+' and '+players[(pid+3)%num_players]+' WIN :)';
+        message = players[pid]+' clams incorrectly!\n'+players[(pid+1)%num_players]+' and '+players[(pid+3)%num_players]+' WIN :)';
       }
       public_gs['history'].push({
-        'move':'claim',
+        'move':'clam',
         'id':pid,
         'winner':pid%2,
         'message':message
       })
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
-          sockets[i].emit('claim success', {
+          sockets[i].emit('clam success', {
             'gid':gid,
             'game_info':game_info,
             'public':public_gs,

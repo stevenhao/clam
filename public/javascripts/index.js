@@ -209,7 +209,7 @@ window.onload = function() {
   })
 
   // Game Listeners
-  for(game_event of ['pass success', 'guess success', 'flip success', 'claim success']) {
+  for(game_event of ['pass success', 'guess success', 'flip success', 'clam success']) {
     socket.on(game_event, function(_gameInfo) {
       gameInfo = _gameInfo;
       if(myView == 'game') {
@@ -441,9 +441,9 @@ renderGame = function() {
   createClamEl = function() {
     var tr = $('<tr>');
     var td = $('<td>').attr('colspan', '2');
-    var button = $('<button>').attr('id', 'claim');
+    var button = $('<button>').attr('id', 'clam');
     tr.append($('<td>')).append($('<td>')).append($('<td>'));
-    tr.append(td.append(button.append('Claim')));
+    tr.append(td.append(button.append('Clam')));
     button.click(function() {
       actionClam();
     });
