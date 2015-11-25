@@ -465,11 +465,10 @@ renderGame = function() {
   table.empty();
 
   table.append(createStatusEl());
-  var pid = myPid;
-  do {
+  var pids = [myPid, (myPid + 2) % 4, (myPid + 1) % 4, (myPid + 3) % 4];
+  for (var pid of pids) {
     table.append(createHandEl(pid));
-    pid = (pid + 1) % 4;
-  } while (pid != myPid);
+  }
 
   table.append(createSelectEl());
   table.append(createSubmitEl());
