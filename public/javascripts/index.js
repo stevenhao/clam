@@ -352,17 +352,17 @@ renderGame = function() {
   }
 
   createNoteEl = function() {
-    var noteEl = $('<textarea>').addClass('notes').html('...');
+    var noteEl = $('<textarea>').addClass('notes').val('...');
     noteEl.focus(function() {
       print('handler for focus called');
-      if ($(this).html() == '...') {
-        $(this).html('');
+      if ($(this).val() == '...') {
+        $(this).val('');
       }
     });
     noteEl.blur(function() {
       print('handler for blur called');
-      if ($(this).html() == '') {
-        $(this).html('...');
+      if ($(this).val() == '') {
+        $(this).val('...');
       }
     });
     return noteEl;
@@ -723,9 +723,10 @@ canClam = function() {
         guess = parseInt(cardEl.html());
       } else {
         var notesEl = $('textarea', cardEl);
-        guess = parseInt(notesEl.html());
+        guess = parseInt(notesEl.val());
       }
       if (isNaN(guess)) {
+        print('can not clam', pid, idx, cardEl);
         ok = false;
       }
     }
@@ -782,7 +783,7 @@ actionClam = function() {
         guess = parseInt(cardEl.html());        
       } else {
         var notesEl = $('textarea', cardEl);
-        guess = parseInt(notesEl.html());
+        guess = parseInt(notesEl.val());
       }
       if (isNaN(guess)) {
         ok = false;
