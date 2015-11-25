@@ -2,7 +2,7 @@ var mysql = require('mysql');
 var passwordHash = require('password-hash');
 
 var connection = mysql.createConnection({
-  host     : '18.111.114.209',
+  host     : 'localhost',
   user     : 'root',
   password : ''
 });
