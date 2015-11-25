@@ -316,7 +316,9 @@ renderWait = function(joinInfo) {
   $('#players-list').html('');
   $('#game-id').html(joinInfo.gid)
   $('#host').html(joinInfo.host);
-  for (var i = 0; i < joinInfo.usernames.length; ++i)
+  for (var i = 0; i < joinInfo.usernames.length; i+=2)
+    $('#players-list').append('<tr><td class="players-list-cell clickable" id="players-list-cell-'+i+'"> </td></tr>');
+  for (var i = 1; i < joinInfo.usernames.length; i+=2)
     $('#players-list').append('<tr><td class="players-list-cell clickable" id="players-list-cell-'+i+'"> </td></tr>');
   
   $('.players-list-cell').click(function(){
@@ -332,11 +334,12 @@ renderWait = function(joinInfo) {
 updateWait = function(joinInfo){
   var filled = true;
   for (var i = 0; i < joinInfo.usernames.length; ++i) {
+    var team = i%2 == 0 ? 'Team A' : 'Team B';
     if (joinInfo.usernames[i] == null){
-      $('#players-list-cell-'+i).html('Join as Player '+(i+1));
+      $('#players-list-cell-'+i).html('Join '+team);
       filled = false;
     } else{
-      $('#players-list-cell-'+i).html(joinInfo.usernames[i]);
+      $('#players-list-cell-'+i).html('<b>'+team+': </b>'+joinInfo.usernames[i]);
     }
   }
 
@@ -532,7 +535,7 @@ updateObjects = function() {
     var turn = parseInt(gameInfo.public.turn);
     var phase = gameInfo.public.phase;
     var names = gameInfo.players;
-
+    var winner = gameInfo.public.winner;
     createStatusMessage = function() {
       if (phase == 'pass') {
         var pid = partner(turn);
@@ -544,7 +547,8 @@ updateObjects = function() {
         var pid = turn;
         return names[pid] + ' to flip';
       } else if (phase == 'over') {
-        return 'Game over';
+        var msg = winner == myPid %2 ? ' win!' : ' lose!';
+        return 'Game Over! You '+msg;
       }
     }
 

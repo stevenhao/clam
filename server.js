@@ -17,7 +17,8 @@ initDatabase = function() { // in case tables don't exist yet
   }
 }
 
-print = console.log.bind(console);
+print = 
+.bind(console);
 
 connection.connect();
 initDatabase();
