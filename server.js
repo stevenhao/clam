@@ -17,6 +17,8 @@ initDatabase = function() { // in case tables don't exist yet
   }
 }
 
+print = console.log.bind(console);
+
 connection.connect();
 initDatabase();
 
@@ -83,7 +85,9 @@ function loadData(){
     open_games = {}
     for(row of rows){
       var gid = row.gid;
-      var game_info = JSON.parse(row.game_info);
+      var game_info = row.game_info;
+      print ('parsing ', game_info);
+      game_info = JSON.parse(row.game_info);
       game_info.sockets = [];
       open_games[gid] = game_info;
     }
@@ -94,7 +98,9 @@ function loadData(){
     finished_games = {};
     for(row of rows){
       var gid = row.gid;
-      var game_info = JSON.parse(row.game_info);
+      var game_info = row.game_info.replace(/\n/, '\\n');
+      game_info = JSON.parse(game_info);
+
       finished_games[gid] = game_info;
     }
   });
@@ -702,10 +708,15 @@ module.exports = function(server){
     
     socket.on('clam', function(guess){
       // guess is in pid order [[1,2,3,4,5,6],[7,8,9,10,11,12],...]
+      print('received clam', guess);
       if (view != 'game'){
         socket.emit('claim error', 'invalid view');
         return;
       }
+      if (public_gs.phase == 'over') {
+        return;
+      }
+      print('computing winner');
       var winner = pid%2;
       for (i = 0; i < num_players; ++i){
         for (j = 0; j < true_cards[0].length; ++j){
@@ -719,7 +730,7 @@ module.exports = function(server){
       }
       public_gs['winner'] = winner;
       public_gs['phase'] = 'over';
-
+      print('winner=', winner);
       var message = "";
       if(winner == pid%2){
         message = players[pid]+' claims successfully!\n'+players[pid]+' and '+players[(pid+2)%num_players]+' WIN :)';
@@ -734,7 +745,7 @@ module.exports = function(server){
       })
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
-          socket.emit('claim success', {
+          sockets[i].emit('claim success', {
             'gid':gid,
             'game_info':game_info,
             'public':public_gs,
@@ -746,8 +757,8 @@ module.exports = function(server){
       finished_games[gid] = games[gid];
       delete finished_games[gid]['sockets'];
       delete games[gid];
+      saveGame('finished', finished_games[gid], gid);
       deleteGame('active', gid);
-      saveGame('finished', game, gid);
     });
 
     socket.on('game_back', function(){
