@@ -242,7 +242,7 @@ window.onload = function() {
   })
 
   // Game Listeners
-  for(game_event of ['pass success', 'guess success', 'flip success']) {
+  for(game_event of ['pass success', 'guess success', 'flip success', 'claim success']) {
     socket.on(game_event, function(_gameInfo) {
       gameInfo = _gameInfo;
       if(myView == 'game') {
@@ -516,8 +516,13 @@ renderGame = function() {
 
 updateObjects = function() {
   updateCardEl = function(cardEl) {
-    var cardInfo = gameInfo.private[pid][idx];
-
+    var cardInfo;
+    var phase = gameInfo.public.phase;
+    if (phase == 'over') {
+      cardInfo = gameInfo.true_cards[pid][idx];
+    } else {
+      cardInfo = gameInfo.private[pid][idx];
+    }
     // fill card backs
     if (cardInfo.color == 1) {
       cardEl.addClass('red');
@@ -562,7 +567,6 @@ updateObjects = function() {
         var pid = turn;
         return names[pid] + ' to flip';
       } else if (phase == 'over') {
-        // TODO: check who won, etc.
         return 'Game over';
       }
     }
@@ -722,9 +726,16 @@ actionClam = function() {
     var curList = [];
     for (var idx = 0; idx < 6; ++idx) {
       var cardEl = $('#' + cardId(pid, idx));
-      var notes = parseInt(cardEl.html());
       var guess = 0;
-      guess = notes;
+      if (cardEl.hasClass('known')) {
+        guess = parseInt(cardEl.html());        
+      } else {
+        var notesEl = $('textarea', cardEl);
+        guess = parseInt(notesEl.html());
+      }
+      if (guess == null) {
+        ok = false;
+      }
       curList.push(guess);
     }
     guessObj.push(curList);
