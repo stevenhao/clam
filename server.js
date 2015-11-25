@@ -1,15 +1,17 @@
 var mysql = require('mysql');
+var passwordHash = require('password-hash');
+
 var connection = mysql.createConnection({
-  host     : 'localhost',
+  host     : '18.111.114.209',
   user     : 'root',
   password : ''
 });
-  
 initDatabase = function() { // in case tables don't exist yet
   var commands = ['create database if not exists clam;',
   'create table if not exists clam.open(gid varchar(10), game_info varchar(10000));',
   'create table if not exists clam.active(gid varchar(10), game_info varchar(10000));',
-  'create table if not exists clam.finished(gid varchar(10), game_info varchar(10000));'];
+  'create table if not exists clam.finished(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.users(username varchar(30), password varchar(100));'];
   for (var command of commands) {
     connection.query(command);
   }
@@ -24,8 +26,9 @@ var finished_games = {};
 var count = 0;
 var APPLY_CHANGES_FREQ = 10;
 var DATABASE = 'clam';
+var users = {};
 
-loadGames();
+loadData();
 
 function randomString(length) {
     chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -54,8 +57,7 @@ function listFinishedGames(){
   return Object.keys(finished_games);
 }
 
-function loadGames(){
-
+function loadData(){
   connection.query('SELECT * FROM '+DATABASE+'.ACTIVE;', function(err, rows, fields){
     if(err) throw err;
     games = {}
@@ -80,11 +82,19 @@ function loadGames(){
 
   connection.query('SELECT * FROM '+DATABASE+'.FINISHED;', function(err, rows, fields){
     if(err) throw err;
-    finished_games = {}
+    finished_games = {};
     for(row of rows){
       var gid = row.gid;
       var game_info = JSON.parse(row.game_info);
       finished_games[gid] = game_info;
+    }
+  });
+
+  connection.query('SELECT * FROM '+DATABASE+'.USERS', function(err, rows, fields){
+    if(err) throw err;
+    users = {};
+    for(row of rows){
+      users[row.username] = {'password':row.password};
     }
   });
 }
@@ -123,6 +133,30 @@ function deleteGame(table, gid){
   });
 }
 
+function authenticate(username, password){
+  if (!(username in users))
+    return false;
+  return passwordHash.verify(password, users[username].password);
+}
+
+function createUser(username, password){
+  if (username in users)
+    return "Username has been taken.";
+  if (username.match("^[a-zA-Z0-9_]+$") == null)
+    return "Username must be alphanumeric characters.";
+  if(password.length < 6)
+    return "Password must be at least 6 characters."
+
+  var hashedPassword = passwordHash.generate(password);
+  users[username] = {'password':hashedPassword};
+  
+
+  connection.query("INSERT INTO "+DATABASE+".users\n VALUES('"+username+"', '"+hashedPassword+"');", function(err, result){
+    if(err) throw err;
+  });
+  return "success";
+}
+
 module.exports = function(server){
   var io = require('socket.io')(server);
 
@@ -143,7 +177,10 @@ module.exports = function(server){
 
     socket.emit('connection', 'user connected');
 
-    socket.on('login', function(_username) {
+    socket.on('login', function(user_info) {
+      var _username = user_info['username'];
+      var _password = user_info['password'];
+
       if(view != 'login') {
         socket.emit('login error', 'invalid view');
         return;
@@ -154,7 +191,12 @@ module.exports = function(server){
         return;
       } 
       if (_username == '') {
-        socket.emit('login error', 'invalid username');
+        socket.emit('login denied', 'invalid username or password');
+        return;
+      }
+
+      if (!authenticate(_username, _password)){
+        socket.emit('login denied', 'invalid username or password');
         return;
       }
 
@@ -165,6 +207,33 @@ module.exports = function(server){
         'gameIds': listGames(),
         'openGameIds': listOpenGames()
       });
+    });
+
+    socket.on('user_register', function(user_info){
+      var _username = user_info['username'];
+      var _password = user_info['password'];
+
+      if(view != 'login') {
+        socket.emit('user_register error', 'invalid view');
+        return;
+      }
+
+      if (username != null) {
+        socket.emit('user_register error', 'already logged in');
+        return;
+      } 
+
+      if(_username == '') {
+        socket.emit('user_register denied', 'invalid username or password');
+        return;
+      }
+
+      var message = createUser(_username, _password);
+      if(message == "success"){
+        socket.emit('user_register success', {'username':_username, 'password':_password});
+      } else{
+        socket.emit('user_register denied', message);
+      }
     });
 
     socket.on('create', function(ginfo){
@@ -198,6 +267,11 @@ module.exports = function(server){
     socket.on('join', function(_gid){
       if(view != 'lobby') {
         socket.emit('join error', 'invalid view');
+        return;
+      }
+
+      if(!(_gid in open_games)){
+        socket.emit('join error', 'invalid gid');
         return;
       }
 
@@ -464,6 +538,8 @@ module.exports = function(server){
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
           sockets[i].emit('guess success', {
+            'pid':pid,
+            'gid':gid,
             'game_info':game_info,
             'public':public_gs, 
             'private':private_gs['cards'][i],
@@ -524,6 +600,8 @@ module.exports = function(server){
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
           sockets[i].emit('pass success', {
+            'pid':pid,
+            'gid':gid,
             'game_info':game_info,
             'public':public_gs, 
             'private':private_gs['cards'][i],
@@ -600,6 +678,8 @@ module.exports = function(server){
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
           sockets[i].emit('flip success', {
+            'pid':pid,
+            'gid':gid,
             'game_info':game_info,
             'public':public_gs, 
             'private':private_gs['cards'][i],
@@ -644,6 +724,7 @@ module.exports = function(server){
       for(i = 0; i < num_players; ++i){
         if(sockets[i] != null)
           socket.emit('claim success', {
+            'gid':gid,
             'game_info':game_info,
             'public':public_gs,
             'true_cards':true_cards,

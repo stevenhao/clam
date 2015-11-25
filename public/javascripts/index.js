@@ -20,9 +20,38 @@ window.onload = function() {
     myUsername = lobby_data['username'];
     renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
 
+    // Resets form data
+    $('#username').val('');
+    $('#password').val('');
+    $('#new-password').val('');
+    $('#new-confirm-password').val('');
+    $('#new-username').val('');
+    $('#register-error').css({'display':'none'});
+    $('#user-auth').removeClass('has-error');
+
+    $('#login-view-nav').css({'display':'none'});
     $('#login-view').css({'display':'none'});
     $('#lobby-view').css({'display':'block'});
+    $('#lobby-view-nav').css({'display':'block'});
   });
+
+  socket.on('login denied', function(message){
+    $('#user-auth').addClass('has-error');
+    $('#password').val('');
+    console.log('Login Denied');
+  });
+
+  socket.on('user_register denied', function(message){
+    $('#register-error').html(message);
+    $('#register-error').css({'display':'block'});
+    $('#new-password').val('');
+    $('#new-confirm-password').val('');
+    $('#new-username').val('');
+  });
+
+  socket.on('user_register success', function(user_info){
+    socket.emit('login', user_info);
+  })
 
   socket.on('logout success', function(){
     if(myView =='login')
@@ -33,8 +62,10 @@ window.onload = function() {
     myUsername = null;
 
     $('#'+myView+'-view').css({'display':'none'});
+    $('#'+myView+'-view-nav').css({'display':'none'});
 
     myView = 'login';
+    $('#login-view-nav').css({'display':'block'});
     $('#login-view').css({'display':'block'});  
   });
 
@@ -71,11 +102,34 @@ window.onload = function() {
   });
 
   // Login Javascript
-  $('#login-view').submit(function() {
+  $('#login-submit').click(function() {
     var username = $('#username').val();
+    var password = $('#password').val();
     if (username == '')
       return false;
-    socket.emit('login', username);
+
+    socket.emit('login', {'username':username, 'password':password});
+    return false;
+  });
+
+  $('#register').click(function(){
+    var username = $('#new-username').val();
+    var password = $('#new-password').val();
+    var confirm_password = $('#new-confirm-password').val();
+    $('#register-error').css({'display':'none'});
+
+    if(password != confirm_password){
+      $('#register-error').html('Passwords do not match.');
+      $('#register-error').css({'display':'block'});
+      $('#new-password').val('');
+      $('#new-confirm-password').val('');
+      return false;
+    }
+
+    if(username == '')
+      return false;
+
+    socket.emit('user_register', {'username':username, 'password':password});
     return false;
   });
 
@@ -99,7 +153,9 @@ window.onload = function() {
     messageCounter = 0;
     renderGame();
     $('#'+myView+'-view').css({'display':'none'});
+    $('#'+myView+'-view-nav').css({'display':'none'});
     $('#game-view').css({'display':'block'});
+    $('#game-view-nav').css({'display':'block'});
 
     myView = 'game';
   });
@@ -112,7 +168,9 @@ window.onload = function() {
     renderWait(joinInfo);
 
     $('#lobby-view').css({'display':'none'});
+    $('#lobby-view-nav').css({'display':'none'});
     $('#wait-view').css({'display':'block'});
+    $('#wait-view-nav').css({'display':'block'});
     myView = 'wait';
   });
 
@@ -156,7 +214,9 @@ window.onload = function() {
     myView = 'lobby';
 
     $('#wait-view').css({'display':'none'});
+    $('#wait-view-nav').css({'display':'none'});
     $('#lobby-view').css({'display':'block'});
+    $('#lobby-view-nav').css({'display':'block'});
   });
 
   socket.on('wait update', function(waitInfo){
@@ -200,7 +260,9 @@ window.onload = function() {
     myView = 'lobby';
     
     $('#game-view').css({'display':'none'});
+    $('#game-view-nav').css({'display':'none'});
     $('#lobby-view').css({'display':'block'});
+    $('#lobby-view-nav').css({'display':'block'});
   });
 
   $('#game-back').click(function(){

@@ -1,6 +1,11 @@
 body {
   font:14px "Lucida Grande" sans-serif;
 }
+
+.navbar{
+  z-index:3;
+}
+
 #game-view {
   display:none;
 }
@@ -19,24 +24,67 @@ body {
   z-index:1;
 }
 #lobby-view {
-  position:fixed;
-  top:50%;
-  left:50%;
-  width:30em;
-  height:18em;
-  margin-top:-15em; /*set to a negative number 1/2 of your height*/
-  margin-left:-9em; /*set to a negative number 1/2 of your width*/
   display:none;
 }
 #login-view {
-  position:fixed;
-  top:50%;
-  left:50%;
-  width:30em;
-  height:18em;
-  margin-top:-9em; /*set to a negative number 1/2 of your height*/
-  margin-left:-15em; /*set to a negative number 1/2 of your width*/
 }
+#lobby-view-nav{
+  display:none;
+}
+.form-signin {
+  max-width: 330px;
+  padding: 25px;
+  margin:auto;
+}
+.form-signin .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+
+#new-username, #new-password, #new-confirm-password, #register {
+  margin-bottom: 5px;
+}
+
+.hero-unit{
+  background-color: #eeeeee;
+  max-width:95%;
+  margin: auto;
+  border-radius:5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align:left;
+  padding-left:60px;
+  padding-right:60px;
+  padding-bottom:50px;
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight: 200;
+  line-height:30px;
+  font-size:18px;
+}
+
+.message {
+  max-width:95%;
+  margin: auto;
+  border-radius:5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color:#dff0d8;
+  border: 1px solid;
+  border-color: #d6e9c6;
+  padding-left:10px;
+  padding-top:10px;
+  padding-bottom:10px;
+  color:#468847;
+}
+
 .open-game-cell {
   height:30px;
   width:100px;
@@ -59,13 +107,6 @@ body {
   font-size:30pt;
 }
 #wait-view { 
-  position:fixed;
-  top:50%;
-  left:50%;
-  width:30em;
-  height:18em;
-  margin-top:-15em; /*set to a negative number 1/2 of your height*/
-  margin-left:-9em; /*set to a negative number 1/2 of your width*/
   display:none;
 }
 .logout {

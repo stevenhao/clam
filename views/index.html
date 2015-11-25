@@ -1,28 +1,76 @@
 <!doctype html>
 <html>
   <head>
-    <title>Clam</title>
+    <title>Clam Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script src="javascripts/socket.io.js"></script>
     <script src="javascripts/jquery-2.1.4.min.js"></script>
     <script src="javascripts/index.js"></script>
+    <script src="javascripts/bootstrap.min.js"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
     <link rel="shortcut icon" type="image/x-icon" href="https://dl.dropboxusercontent.com/u/18927314/favicon2.ico">
     <style> html, body { height:90%; }</style>
 
   </head>
 
   <body>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Clam Online</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div id="login-view-nav">
+            <form class="navbar-form navbar-left" role="search">
+              <div class="form-group" id="user-auth">
+                <input type="text" class="form-control" action="" id="username" placeholder="Username">
+                <input type="password" class="form-control" action="" id="password" placeholder="Password">
+              </div>
+              <button type="submit" id="login-submit" style="outline: none" class="btn btn-primary">Play!</button>
+            </form>
+        </div>
+
+        <div id="lobby-view-nav">
+          <ul class="nav navbar-nav navbar-right">
+            <li class="logout"><a class="clickable">Logout</a></li>
+          </ul>
+        </div>
+        </div>
+
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
     <section id="login-view">
-      <h1> Welcome to Clam! </h1>
-      <form>
-        <label for="username">Username: </label>
-        <input type="text" name="username" action="" id="username"><br>
-        <label for="password">Password: </label>
-        <input type="text" name="password" action="" id="password">
-        <button>Submit </button>
-      </form>
-      <h1 id="fast-forward" style="cursor:pointer"> Fast Forward </h1>
-      
+<!--       <h1> Welcome to Clam! </h1>
+      <h1 id="fast-forward"> Fast Forward </h1> -->
+      <div class="container">
+        <div class="message">
+          Welcome to Clam beta! Let us know if you find any bugs! -- dzd123 and hsteven
+        </div>
+      </div>
+      <div class="container">
+        <div class="hero-unit">
+          <form class="form-signin">
+            <h2 class="form-signin-heading">New to Clam?</h2>
+            <input type="username" id="new-username" class="form-control" placeholder="Username">
+            <input type="password" id="new-password" class="form-control" placeholder="Password">
+            <input type="password" id="new-confirm-password" class="form-control" placeholder="Confirm Password">
+            <button class="btn btn-lg btn-primary btn-block" style="outline:none" id="register" type="submit">Register</button>
+            <div class="alert alert-danger" style="padding:3px;padding-left:10px;display:none" id="register-error">
+            </div>
+          </form>
+          Clam Online is the free, online version of the popular card game Clam, wherein players fight for victory in the ultimate test of logic, dexterity, and self-worth. 
+        </div>
+      </div>
     </section>
 
     <section id="lobby-view">
@@ -37,7 +85,6 @@
 
       </table>
       <button id='create-game'>Create Game</button>
-      <button class="logout">Logout</button>
     </section>
 
     <section id="wait-view">
