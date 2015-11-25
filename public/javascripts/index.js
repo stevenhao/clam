@@ -659,7 +659,7 @@ actionClam = function() {
         var notesEl = $('textarea', cardEl);
         guess = parseInt(notesEl.html());
       }
-      if (guess == null) {
+      if (guess == NaN) {
         ok = false;
       }
       curList.push(guess);
@@ -671,7 +671,7 @@ actionClam = function() {
     print("clam is not ok.");
   } else {
     print("sending to server.");
+    socket.emit('clam', guessObj);
   }
-  socket.emit('clam', guessObj);
 }
 
