@@ -402,6 +402,7 @@ renderGame = function() {
 
       cardEl.on('taphold', function() {
         selectCard($(this));
+        return true;
       });
       handEl.append(cardEl);
     }
