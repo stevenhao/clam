@@ -5,7 +5,6 @@ selectedCard = null;
 myUsername = null;
 print = console.log.bind(console);
 messageCounter = 0;
-timeoutId = 0;
 
 window.onload = function() {
   socket = io();
@@ -67,38 +66,6 @@ window.onload = function() {
     myView = 'login';
     $('#login-view-nav').css({'display':'block'});
     $('#login-view').css({'display':'block'});  
-  });
-
-  $('#fast-forward').click(function() {
-    var a = 'a', b = 'b', c = 'c', d = 'd';
-    socket.emit('login', a);
-    socket.emit('create', {
-      'num_players': 4,
-      'num_colors': 2,
-      'num_ranks': 12,
-    });
-    socket.emit('logout');
-    socket.once('create success', function(gid) {
-      socket.emit('login', b);
-      socket.emit('join', gid);
-      socket.emit('add_user', 1);
-      socket.emit('logout');
-
-      socket.emit('login', c);
-      socket.emit('join', gid);
-      socket.emit('add_user', 2);
-      socket.emit('logout');
-
-      socket.emit('login', d);
-      socket.emit('join', gid);
-      socket.emit('add_user', 3);
-      socket.emit('logout');
-
-      socket.emit('login', a);
-      socket.emit('join', gid);
-      socket.emit('add_user', 0);
-      socket.emit('start');
-    });
   });
 
   // Login Javascript
@@ -641,47 +608,6 @@ selectCard = function(card) {
     selectedCard = card;
   }
 }
-
-
-
-  // $('#goform').submit(function() {
-  //   // pass, guess, flip
-  //   try {
-  //   if (selectedCard == null) {
-  //     print('WHAT CARD DUDE');
-  //     return false;
-  //   }
-
-  //   if (myPid != getNextAction()) {
-  //     print('NOT YOUR TURN BRO!');
-  //     return false;
-  //   }
-
-  //   var phase = gameInfo.public.phase;
-  //   if (phase == 'pass') {
-  //     if (selectedCard.pid != myPid) {
-  //       print('PASS YOUR CARD DUDE');
-  //       return false;
-  //     }
-  //     socket.emit('pass', {'card': selectedCard.idx});
-  //   } else if (phase == 'guess') {
-  //     var rank = $('#guess').val();
-  //     var guessObj = {'target_id': selectedCard.pid, 'target_card': selectedCard.idx, 'rank': rank};
-  //     socket.emit('guess', guessObj);
-  //   } else if (phase == 'flip') {
-  //     if (selectedCard.pid != myPid) {
-  //       print('FLIP YOUR CARD DUDE');
-  //       return false;
-  //     }
-  //     socket.emit('flip', {'card': selectedCard.idx});
-  //   }
-  // }
-  //   catch(e) {
-  //     print('exception', e);
-  //   }
-
-  //   return false;
-  // });
 
 actionGuess = function(rank) {
   if (selectedCard != null) {
