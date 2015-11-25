@@ -86,7 +86,6 @@ function loadData(){
     for(row of rows){
       var gid = row.gid;
       var game_info = row.game_info;
-      print ('parsing ', game_info);
       game_info = JSON.parse(row.game_info);
       game_info.sockets = [];
       open_games[gid] = game_info;
@@ -708,7 +707,6 @@ module.exports = function(server){
     
     socket.on('clam', function(guess){
       // guess is in pid order [[1,2,3,4,5,6],[7,8,9,10,11,12],...]
-      print('received clam', guess);
       if (view != 'game'){
         socket.emit('clam error', 'invalid view');
         return;
@@ -716,7 +714,6 @@ module.exports = function(server){
       if (public_gs.phase == 'over') {
         return;
       }
-      print('computing winner');
       var winner = pid%2;
       for (i = 0; i < num_players; ++i){
         for (j = 0; j < true_cards[0].length; ++j){
@@ -730,7 +727,6 @@ module.exports = function(server){
       }
       public_gs['winner'] = winner;
       public_gs['phase'] = 'over';
-      print('winner=', winner);
       var message = "";
       if(winner == pid%2){
         message = players[pid]+' clams successfully!\n'+players[pid]+' and '+players[(pid+2)%num_players]+' WIN :)';
