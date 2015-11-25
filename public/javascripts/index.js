@@ -277,7 +277,16 @@ renderLobby = function(games, open_games) {
     var hostCell = $('<td>').append(game.host);
     var joined = game.usernames.indexOf(myUsername) != -1 || myUsername == game.host;
     var joinedCell = $('<td>').append(joined ? 'Yes': 'No');
-    $('#open-games').append(tr.append(gidCell).append(hostCell).append(joinedCell));
+
+    var openSpots = 0;
+    for(var i = 0; i < game.usernames.length; ++i){
+        if(game.usernames[i] == null)
+            openSpots++;
+    }
+    var openSpotsCell = $('<td>').append(openSpots);
+
+
+    $('#open-games').append(tr.append(gidCell).append(hostCell).append(joinedCell).append(openSpotsCell));
     if(joined){
       tr = $('<tr>').addClass('clickable').addClass('open-game-cell').attr('gid', gameId);
       gidCell = $('<td>').append(gameId);
