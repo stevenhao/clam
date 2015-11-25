@@ -18,7 +18,7 @@ window.onload = function() {
 
     myView = 'lobby';
     myUsername = lobby_data['username'];
-    renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
+    renderLobby(lobby_data['games'], lobby_data['openGames']);
 
     // Resets form data
     $('#username').val('');
@@ -171,6 +171,7 @@ window.onload = function() {
     $('#lobby-view-nav').css({'display':'none'});
     $('#wait-view').css({'display':'block'});
     $('#wait-view-nav').css({'display':'block'});
+    console.log('hey');
     myView = 'wait';
   });
 
@@ -181,7 +182,7 @@ window.onload = function() {
   socket.on('updateGameList', function(gameList){
     if(myView != 'lobby')
       return;
-    updateLobby(gameList['gameIds'], gameList['openGameIds']);
+    updateLobby(gameList['games'], gameList['openGames']);
   });
   
   // Lobby Javascript
@@ -209,7 +210,7 @@ window.onload = function() {
     if(myView != 'wait')
       return;
     
-    renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
+    renderLobby(lobby_data['games'], lobby_data['openGames']);
     myGid = null;
     myView = 'lobby';
 
@@ -254,7 +255,7 @@ window.onload = function() {
     if(myView != 'game')
       return;
     
-    renderLobby(lobby_data['gameIds'], lobby_data['openGameIds']);
+    renderLobby(lobby_data['games'], lobby_data['openGames']);
     myGid = null;
     myPid = null;
     myView = 'lobby';
@@ -281,30 +282,53 @@ partner = function(x) {
 }
 
 renderLobby = function(games, open_games) {
-  $('#game-ids').html('');
-  $('#open-game-ids').html('');
-  for(game of games) {
-    var tr = $('<tr>');
-    var td = $('<td>').addClass('game-cell').addClass('clickable');
-    $('#game-ids').append(tr.append(td.append(game)));
+  $('#active-games').html('');
+  $('#open-games').html('');
+  $('#my-games').html('');
+  for(gameId in games) {
+    var game = games[gameId];
+    var tr = $('<tr>').addClass('clickable').addClass('game-cell').attr('gid', gameId);
+    var gidCell = $('<td>').append(gameId);
+    var hostCell = $('<td>').append(game.host);
+    var joined = game.usernames.indexOf(myUsername) != -1 || myUsername == game.host;
+    var joinedCell = $('<td>').append(joined ? 'Yes': 'No');
+    $('#active-games').append(tr.append(gidCell).append(hostCell).append(joinedCell));
+    if(joined){
+      tr = $('<tr>').addClass('clickable').addClass('game-cell').attr('gid', gameId);
+      gidCell = $('<td>').append(gameId);
+      hostCell = $('<td>').append(game.host);
+      statusCell = $('<td>').append('Active');
+      $('#my-games').append(tr.append(gidCell).append(hostCell).append(statusCell));
+    }
   }
 
-  for(game of open_games) {
-    var tr = $('<tr>');
-    var td = $('<td>').addClass('open-game-cell').addClass('clickable');
-    $('#open-game-ids').append(tr.append(td.append(game)));
+  for(gameId in open_games) {
+    var game = open_games[gameId];
+    var tr = $('<tr>').addClass('clickable').addClass('open-game-cell').attr('gid', gameId);
+    var gidCell = $('<td>').append(gameId);
+    var hostCell = $('<td>').append(game.host);
+    var joined = game.usernames.indexOf(myUsername) != -1 || myUsername == game.host;
+    var joinedCell = $('<td>').append(joined ? 'Yes': 'No');
+    $('#open-games').append(tr.append(gidCell).append(hostCell).append(joinedCell));
+    if(joined){
+      tr = $('<tr>').addClass('clickable').addClass('open-game-cell').attr('gid', gameId);
+      gidCell = $('<td>').append(gameId);
+      hostCell = $('<td>').append(game.host);
+      statusCell = $('<td>').append('Open');
+      $('#my-games').append(tr.append(gidCell).append(hostCell).append(statusCell));
+    }
   }
 
   $('.game-cell').click(function(){
-    var gameId = $(this).html();
+    var gameId = $(this).attr('gid');
     socket.emit('register', gameId);
   });
 
   $('.open-game-cell').click(function(){
-    var gameId = $(this).html();
-
+    var gameId = $(this).attr('gid');
     socket.emit('join', gameId);
   });
+  $('#lobby-greeting').html('Welcome, '+myUsername+'!');
 }
 
 updateLobby = function(games, open_games) {
@@ -313,10 +337,10 @@ updateLobby = function(games, open_games) {
 
 renderWait = function(joinInfo) {
   $('#players-list').html('');
-  $('#game-id').html('Game Id: '+joinInfo.gid)
-  $('#host').html('Host: ' + joinInfo.host);
+  $('#game-id').html(joinInfo.gid)
+  $('#host').html(joinInfo.host);
   for (var i = 0; i < joinInfo.usernames.length; ++i)
-    $('#players-list').append('<tr><td class="players-list-cell" id="players-list-cell-'+i+'"> </td></tr>');
+    $('#players-list').append('<tr><td class="players-list-cell clickable" id="players-list-cell-'+i+'"> </td></tr>');
   
   $('.players-list-cell').click(function(){
     var id = $(this).attr('id');
@@ -324,6 +348,7 @@ renderWait = function(joinInfo) {
     socket.emit('add_user', pid);
   });
 
+  $('#wait-greeting').html('Welcome, '+myUsername+'!');
   updateWait(joinInfo);
 }
 
@@ -484,6 +509,7 @@ renderGame = function() {
   table.append(createClamEl());
 
   $('#history-text').empty();
+  $('#game-greeting').html('Welcome, '+myUsername+'!');
 
   updateObjects();
 }

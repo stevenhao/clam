@@ -39,22 +39,31 @@ function randomString(length) {
 
 function newGameId(){
   var newId = randomString(6);
-  if(!(newId in listGames()) && !(newId in listOpenGames()) && !(newId in listFinishedGames())){
+  if(!(newId in games) && !(newId in open_games) && !(newId in finished_games)){
     return newId;
   }
   return newGameId();
 }
 
 function listGames(){
-  return Object.keys(games);
+  games_info = {};
+  for(game in games)
+    games_info[game] = {'usernames':games[game]['usernames'], 'host':games[game]['host']};
+  return games_info;
 }
 
 function listOpenGames(){
-  return Object.keys(open_games);
+  games_info = {};
+  for(game in open_games)
+    games_info[game] = {'usernames':open_games[game]['usernames'], 'host':open_games[game]['host']};
+  return games_info;
 }
 
 function listFinishedGames(){
-  return Object.keys(finished_games);
+  games_info = {};
+  for(game in finished_games)
+    games_info[game] = {'usernames':finished_games[game]['usernames'], 'host':finished_games[game]['host']};
+  return games_info;
 }
 
 function loadData(){
@@ -204,8 +213,8 @@ module.exports = function(server){
       username = _username;
       socket.emit('login success', {
         'username': username,
-        'gameIds': listGames(),
-        'openGameIds': listOpenGames()
+        'games': listGames(),
+        'openGames': listOpenGames()
       });
     });
 
@@ -256,8 +265,8 @@ module.exports = function(server){
       open_games[id]['host'] = username;
 
       io.sockets.emit('updateGameList', {
-        'gameIds': listGames(),
-        'openGameIds': listOpenGames()
+        'games': listGames(),
+        'openGames': listOpenGames()
       });
 
       socket.emit('create success', id);
@@ -380,6 +389,8 @@ module.exports = function(server){
           'usernames': open_games[gid]['usernames']
         });
       }
+
+      saveGame('open', open_games[gid], gid);
     });
 
     socket.on('start', function(){
@@ -440,8 +451,8 @@ module.exports = function(server){
       gid = null;
       view = 'lobby';
       socket.emit('wait_back success', {
-        'gameIds': listGames(),
-        'openGameIds': listOpenGames()
+        'games': listGames(),
+        'openGames': listOpenGames()
       });
     });
 
@@ -750,8 +761,8 @@ module.exports = function(server){
       pid = null;
       view = 'lobby';
       socket.emit('game_back success', {
-        'gameIds': listGames(),
-        'openGameIds': listOpenGames()
+        'games': listGames(),
+        'openGames': listOpenGames()
       });
     })
 

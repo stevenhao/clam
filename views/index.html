@@ -40,6 +40,23 @@
 
         <div id="lobby-view-nav">
           <ul class="nav navbar-nav navbar-right">
+            <li><a class="unclickable" id="lobby-greeting"></a></li>
+            <li class="logout"><a class="clickable">Logout</a></li>
+          </ul>
+        </div>
+
+        <div id="wait-view-nav">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a class="unclickable" id="wait-greeting"></a></li>
+            <li id="wait-back"><a class="clickable">Back to Lobby</a></li>
+            <li class="logout"><a class="clickable">Logout</a></li>
+          </ul>
+        </div>
+
+        <div id="game-view-nav">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a class="unclickable" id="game-greeting"></a></li>
+            <li id="game-back"><a class="clickable">Back to Lobby</a></li>
             <li class="logout"><a class="clickable">Logout</a></li>
           </ul>
         </div>
@@ -74,7 +91,7 @@
     </section>
 
     <section id="lobby-view">
-      <h1> Lobby </h1>
+      <!-- <h1> Lobby </h1>
       Active Games:
       <table id="game-ids">
 
@@ -83,11 +100,77 @@
       Open Games:
       <table id="open-game-ids">
 
-      </table>
-      <button id='create-game'>Create Game</button>
+      </table> -->
+      <!-- <button id='create-game'>Create Game</button> -->
+      <div class="container" style="width:70%">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">My Games</h3>
+          </div>
+          <div class="panel-body">
+            <div class="scroll-table">
+              <table class="table table-condensed table-hover">
+                <thead>
+                  <tr>
+                    <th>Game Id</th>
+                    <th>Host</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="my-games">
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Open Games</h3>
+          </div>
+          <div class="panel-body">
+            <div class="scroll-table">
+              <table class="table table-condensed table-hover">
+                <thead>
+                  <tr>
+                    <th>Game Id</th>
+                    <th>Host</th>
+                    <th>Joined?</th>
+                  </tr>
+                </thead>
+                <tbody id="open-games">
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Active Games</h3>
+          </div>
+          <div class="panel-body">
+            <div class="scroll-table">
+              <table class="table table-condensed table-hover">
+                <thead>
+                  <tr>
+                    <th>Game Id</th>
+                    <th>Host</th>
+                    <th>Joined?</th>
+                  </tr>
+                </thead>
+                <tbody id="active-games">
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-large" id="create-game" style="outline:none">Create Game</button>
+      </div>
     </section>
 
-    <section id="wait-view">
+    <section id="wait-view"><!-- 
       <h1> Waiting Room: </h1> 
       <h3 id="game-id"> </h3>
       <h3 id="host"> </h3>
@@ -96,9 +179,33 @@
       <table id="players-list">
 
       </table>
-      <button id="start-game">Start Game</button>
-      <button id="wait-back">Back</button>
-      <button class="logout">Logout</button>
+      <button id="start-game">Start Game</button> -->
+      <div class="container">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Waiting Room</h3>
+          </div>
+          <div class="panel-body">
+            <dl class="dl-horizontal" style="font-size:19px">
+              <dt>Game Id:</dt>
+              <dd id="game-id"></dd>
+              <dt>Host:</dt>
+              <dd id="host"></dd>
+            </dl>
+            <table class="table table-condensed table-hover">
+              <thead>
+                <tr>
+                  <th>Players</th>
+                </tr>
+              </thead>
+              <tbody id="players-list">
+
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-primary btn-large" id="start-game">Start Game</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="game-view">
@@ -119,10 +226,6 @@
         </div>
         <textarea id="notes" rows="10" cols="50"></textarea>
         <div id="history"><div id="history-text">Welcome to Clam<br>dzd123 passed card 3 to P2</div></div>
-        <div id="return-buttons">
-          <button id="game-back">Back</button>
-          <button class="logout">Logout</button>
-        </div>
       </div>
     </section>
   </body>
