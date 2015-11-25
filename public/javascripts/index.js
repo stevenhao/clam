@@ -509,7 +509,7 @@ renderGame = function() {
   table.append(createClamEl());
 
   $('#history-text').empty();
-  $('#game-greeting').html('Welcome, '+myUsername+'!');
+  $('#game-greeting').html('Your Game ID is '+myGid+'.');
 
   updateObjects();
 }
