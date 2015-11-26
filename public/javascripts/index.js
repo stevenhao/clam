@@ -400,7 +400,7 @@ renderGame = function() {
         return true;
       });
 
-      cardEl.on('taphold', function() {
+      cardEl.bind('touchy-longpress', function() {
         selectCard($(this));
         return true;
       });
