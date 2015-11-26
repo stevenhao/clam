@@ -124,7 +124,7 @@ function saveGame(table, game, gid){
     'usernames': game.usernames,
     'host': game.host
   });
-  game = game.replace("'", "\\\'");
+  game = game.replace(/'/g, "\\\'");
 
   table = table.toUpperCase();
   connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result){

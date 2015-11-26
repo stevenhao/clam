@@ -67,8 +67,8 @@ body{
   overflow:auto;
 }
 #history-container{
-  height:440px;
-  max-height:440px;
+  height:300px;
+  max-height:300px;
   overflow:auto;
 }
 #start-game{
@@ -115,16 +115,16 @@ button, .clickable{
   background-color:red;
 }
 .card.selected{
-  width:64px;
+  width:74px;
   height:106px;
   border:solid green 3px;
 }
 .card.known{
-  font-size:25pt;
+  font-size:25px;
 }
 .card.flipped{
   font-weight:bold;
-  font-size:40pt;
+  font-size:40px;
 }
 
 /* notes stuff */
@@ -202,4 +202,31 @@ button, .clickable{
 }
 #history-text{
   margin-left:10px;
+}
+
+@media only screen
+and (max-width:500px){
+  .card.known{
+    font-size:13px;
+  }
+  .card.flipped{
+    font-size:18px;
+  }
+  .card{
+    height:76px;
+  }
+  .card.selected{
+    height:70px;
+  }
+  #game-view-right {
+    width:85vw;
+    margin-left:7.5vw;
+  }
+  #history-container {
+    height:225px;
+    max-height:225px;
+  }
+  .player-name {
+    width:40px;
+  }
 }
