@@ -27,14 +27,34 @@ var util = {
     return array;
   },
 
-
- randomString: function(length) {
+  // returns random alphanumeric string of len length
+  randomString: function(length) {
     chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var result = '';
     for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
     return result;
   },
 
+
+  // creates a clone of an array
+  cloneObj: function(obj) {
+    function clone(o, curr) {
+      for (var l in o){
+        if (o[l] instanceof Object) {
+          curr[l] = cloneObj(o[l]);
+        } else {
+          curr[l] = o[l];
+        }
+      }
+      return curr;
+    }
+
+    return obj instanceof Array 
+             ? obj.slice().map( function (v) { return cloneObj(v); } )
+             : obj instanceof Object 
+                 ? clone(obj, {})
+                 : obj;
+  },
 };
 
 module.exports = util;

@@ -192,8 +192,8 @@ window.onload = function() {
   socket.on('start', function(startInfo) {
     if (myView == 'wait' && myGid == startInfo['gid']) {
       if(startInfo['usernames'].indexOf(myUsername) != -1) {
+        print('registering');
         socket.emit('register', startInfo['gid']);
-        console.log('yo');
       }
     }
   });
@@ -267,7 +267,6 @@ renderLobby = function(games, open_games) {
             openSpots++;
     }
     var openSpotsCell = $('<td>').append(openSpots);
-
 
     $('#open-games').append(tr.append(gidCell).append(hostCell).append(joinedCell).append(openSpotsCell));
     if(joined) {
@@ -523,7 +522,7 @@ updateObjects = function() {
   updateStatusEl = function(el) {
     var turn = parseInt(gameInfo.public.turn);
     var phase = gameInfo.public.phase;
-    var names = gameInfo.players;
+    var names = gameInfo.usernames;
     var winner = gameInfo.public.winner;
     createStatusMessage = function() {
       if (phase == 'pass') {
@@ -582,18 +581,14 @@ updateObjects = function() {
   updateHandEl = function(pid) {
     // fill name
     var nameEl = $('#' + nameId(pid));
-    var name = gameInfo.players[pid];
+    var name = gameInfo.usernames[pid];
     nameEl.html(name);
 
     for(var idx = 0; idx < 6; ++idx) {
       var cardEl = $('#' + cardId(pid, idx));
       var cardInfo;
       var phase = gameInfo.public.phase;
-      if (phase == 'over') {
-        cardInfo = gameInfo.true_cards[pid][idx];
-      } else {
-        cardInfo = gameInfo.private[pid][idx];
-      }
+      cardInfo = gameInfo.private[pid][idx];
 
       updateCardEl(cardEl, cardInfo);
     }
