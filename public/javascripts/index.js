@@ -366,13 +366,11 @@ renderGame = function() {
   createNoteEl = function() {
     var noteEl = $('<textarea>').addClass('notes').val('...');
     noteEl.focus(function() {
-      print('handler for focus called');
       if ($(this).val() == '...') {
         $(this).val('');
       }
     });
     noteEl.blur(function() {
-      print('handler for blur called');
       if ($(this).val() == '') {
         $(this).val('...');
       }
@@ -389,13 +387,12 @@ renderGame = function() {
 
   createHandEl = function(pid) {
     var handEl = $('<tr>');
-    var nameEl = createNameEl(name).attr('id', nameId(pid));
+    var nameEl = createNameEl().attr('id', nameId(pid));
     handEl.append(nameEl.css({'font-size':'large','font-weight':'bold'}));
 
     for (var idx = 0; idx < 6; ++idx) {
       var cardEl = createCardEl().attr('id', cardId(pid, idx)).attr('pid', pid).attr('idx', idx);
       cardEl.dblclick(function(e) {
-        print('handler for doubleclick called');
         selectCard($(this));
         return true;
       });
@@ -426,7 +423,6 @@ renderGame = function() {
 
         div.attr('value', j);
         div.click(function() {
-          // print('clicked', $(this).attr('value'));
           actionGuess($(this).attr('value'));
         });
       }
@@ -442,7 +438,6 @@ renderGame = function() {
     tr.append(td.append($('<div style="margin:auto;width:150px">').append(button.append('Submit'))));
     button.click(function() {
       var phase = gameInfo.public.phase;
-      print('submit was clicked, phase=', phase);
       if (phase == 'pass') {
         actionPass();
       } else if (phase == 'flip') {
@@ -481,7 +476,7 @@ renderGame = function() {
   table.append(createStatusEl());
   var pids = [myPid, (myPid + 2) % 4, (myPid + 1) % 4, (myPid + 3) % 4];
   for (var pid of pids) {
-    table.append(createHandEl(pid));
+    table.append(createHandEl(pid, names[pid]));
   }
 
   table.append(createSelectEl());
@@ -576,7 +571,6 @@ updateObjects = function() {
       pid = partner(turn);
     }
 
-    print ('updating button visibility', pid, phase);
     if (pid == myPid) {
       if (phase == 'pass') {
         submit.removeClass('hidden');
@@ -592,22 +586,24 @@ updateObjects = function() {
     }
   }
 
-  for (var pid = 0; pid < 4; ++pid) {
-    // fill names
-    var nameEl = $('#' + nameId(pid));    
+  updateHandEl = function(pid) {
+    // fill name
+    var nameEl = $('#' + nameId(pid));
     var name = gameInfo.players[pid];
     nameEl.html(name);
 
     for(var idx = 0; idx < 6; ++idx) {
       var cardEl = $('#' + cardId(pid, idx));
       updateCardEl(cardEl);
-    }
+    }  
   }
 
+  for(var pid = 0; pid < 4; ++pid) {
+    updateHandEl(pid);
+  }
   updateStatusEl($('#status'));
   updateHistoryEl($('#history-text'));
   updateButtonVisibility($('#select'), $('#submit'), $('#filler'));
-  updateButtonOpacity();
 }
 
 updateButtonOpacity = function() {
@@ -622,7 +618,6 @@ updateButtonOpacity = function() {
   if (pid == myPid) {
     if (phase == 'pass') {
       if (canPass()) {
-        print('can pass, enabling button.');
         submit.removeAttr('disabled');
         submit.removeClass('disabled');
       } else {
@@ -631,7 +626,6 @@ updateButtonOpacity = function() {
       }
     } else if (phase == 'flip') {
       if (canFlip()) {
-        print('can pass, enabling button.');
         submit.removeAttr('disabled');
         submit.removeClass('disabled');
       } else {
@@ -651,7 +645,6 @@ updateButtonOpacity = function() {
       });
     }
   }
-  updateClamOpacity();
 }
 
 updateClamOpacity = function() {
@@ -668,6 +661,8 @@ updateClamOpacity = function() {
 
 updateGame = function() {
   updateObjects();
+  updateButtonOpacity();
+  updateClamOpacity();
 }
 
 selectCard = function(card) {
@@ -692,6 +687,37 @@ deselect = function() {
     selectedCard = null;
   }
   updateButtonOpacity();
+}
+
+validClamObj = function(guessObj) {
+  for (var curList of guessObj) {
+    for (var guess of curList) {
+      if (isNaN(guess)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+getClamObj = function() {
+  var clamObj = [];
+  for (var pid = 0; pid < 4; ++pid) {
+    var curList = [];
+    for (var idx = 0; idx < 6; ++idx) {
+      var cardEl = $('#' + cardId(pid, idx));
+      var guess = 0;
+      if (cardEl.hasClass('known')) {
+        guess = parseInt(cardEl.html());        
+      } else {
+        var notesEl = $('textarea', cardEl);
+        guess = parseInt(notesEl.val());
+      }
+      curList.push(guess);
+    }
+    clamObj.push(curList);
+  }
+  return clamObj;
 }
 
 canGuess = function(rank) {
@@ -733,23 +759,8 @@ canFlip = function() {
 }
 
 canClam = function() {
-  var ok = true;
-  for (var pid = 0; pid < 4; ++pid) {
-    for (var idx = 0; idx < 6; ++idx) {
-      var cardEl = $('#' + cardId(pid, idx));
-      var guess = 0;
-      if (cardEl.hasClass('known')) {
-        guess = parseInt(cardEl.html());
-      } else {
-        var notesEl = $('textarea', cardEl);
-        guess = parseInt(notesEl.val());
-      }
-      if (isNaN(guess)) {
-        print('can not clam', pid, idx, cardEl);
-        ok = false;
-      }
-    }
-  }
+  var clamObj = getClamObj();
+  var ok = validClamObj(clamObj);
   return ok;
 }
 
@@ -791,32 +802,15 @@ actionFlip = function() {
 }
 
 actionClam = function() {
-  var ok = true;
-  var guessObj = [];
-  for (var pid = 0; pid < 4; ++pid) {
-    var curList = [];
-    for (var idx = 0; idx < 6; ++idx) {
-      var cardEl = $('#' + cardId(pid, idx));
-      var guess = 0;
-      if (cardEl.hasClass('known')) {
-        guess = parseInt(cardEl.html());        
-      } else {
-        var notesEl = $('textarea', cardEl);
-        guess = parseInt(notesEl.val());
-      }
-      if (isNaN(guess)) {
-        ok = false;
-      }
-      curList.push(guess);
-    }
-    guessObj.push(curList);
-  }
-  print('clam', guessObj);
+  var clamObj = getClamObj();
+  print("clamming", clamObj);
+
+  var ok = validClamObj(clamObj);
   if (!ok) {
-    print("clam is not ok.");
+    print("clam is not ok");
   } else {
-    print("sending to server.");
-    socket.emit('clam', guessObj);
+    print("clam is ok, sending to server")
+    socket.emit('clam', clamObj);
   }
 }
 
