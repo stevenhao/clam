@@ -545,7 +545,7 @@ updateObjects = function() {
   updateHistoryEl = function(el) {
     var history = gameInfo.public.history;
     while (messageCounter < history.length) {
-      el.append(history[messageCounter].message).append($('<br>'));
+      el.append($('<tr>').append($('<td>').append(history[messageCounter].message)));
       ++messageCounter;
     }
   }
