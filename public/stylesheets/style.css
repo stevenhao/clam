@@ -2,10 +2,6 @@ body{
   font:14px "Lucida Grande" sans-serif;
 }
 
-/* view hiding stuff */
-#game-view, #lobby-view, #lobby-view-nav, #wait-view-nav, #game-view-nav{
-  display:none;
-}
 .navbar{
   z-index:3;
 }
@@ -81,9 +77,6 @@ body{
 #status{
   font-weight:bold;
   font-size:30pt;
-}
-#wait-view{ 
-  display:none;
 }
 .logout{
   z-index:2;

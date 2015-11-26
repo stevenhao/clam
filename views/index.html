@@ -29,7 +29,7 @@
           <a class="navbar-brand" href="#">Clam Online</a>
         </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <div id="login-view-nav">
+          <div id="login-view-nav">
             <form class="navbar-form navbar-left" role="search">
               <div class="form-group" id="user-auth">
                 <input type="text" class="form-control" action="" id="username" placeholder="Username">
@@ -37,37 +37,37 @@
               </div>
               <button type="submit" id="login-submit" style="outline: none" class="btn btn-primary">Play!</button>
             </form>
-        </div>
+          </div>
 
-        <div id="lobby-view-nav">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a class="unclickable" id="lobby-greeting"></a></li>
-            <li class="logout"><a class="clickable">Logout</a></li>
-          </ul>
-        </div>
+          <div id="lobby-view-nav">
+            <ul class="nav navbar-nav navbar-right">
+              <li><a class="unclickable" id="lobby-greeting"></a></li>
+              <li class="logout"><a class="clickable">Logout</a></li>
+            </ul>
+          </div>
 
-        <div id="wait-view-nav">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a class="unclickable" id="wait-greeting"></a></li>
-            <li id="wait-back"><a class="clickable">Back to Lobby</a></li>
-            <li class="logout"><a class="clickable">Logout</a></li>
-          </ul>
-        </div>
+          <div  id="wait-view-nav">
+            <ul class="nav navbar-nav navbar-right">
+              <li><a class="unclickable" id="wait-greeting"></a></li>
+              <li id="wait-back"><a class="clickable">Back to Lobby</a></li>
+              <li class="logout"><a class="clickable">Logout</a></li>
+            </ul>
+          </div>
 
-        <div id="game-view-nav">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a class="unclickable" id="game-greeting"></a></li>
-            <li id="game-back"><a class="clickable">Back to Lobby</a></li>
-            <li class="logout"><a class="clickable">Logout</a></li>
-          </ul>
-        </div>
+          <div  id="game-view-nav">
+            <ul class="nav navbar-nav navbar-right">
+              <li><a class="unclickable" id="game-greeting"></a></li>
+              <li id="game-back"><a class="clickable">Back to Lobby</a></li>
+              <li class="logout"><a class="clickable">Logout</a></li>
+            </ul>
+          </div>
         </div>
 
       </div><!-- /.container-fluid -->
     </nav>
 
 
-    <section id="login-view">
+    <section  id="login-view">
 <!--       <h1> Welcome to Clam! </h1>
       <h1 id="fast-forward"> Fast Forward </h1> -->
       <div class="container">
@@ -91,7 +91,7 @@
       </div>
     </section>
 
-    <section id="lobby-view">
+    <section  id="lobby-view">
       <!-- <h1> Lobby </h1>
       Active Games:
       <table id="game-ids">
@@ -172,16 +172,7 @@
       </div>
     </section>
 
-    <section id="wait-view"><!-- 
-      <h1> Waiting Room: </h1> 
-      <h3 id="game-id"> </h3>
-      <h3 id="host"> </h3>
-
-      <h3> Players: </h3>
-      <table id="players-list">
-
-      </table>
-      <button id="start-game">Start Game</button> -->
+    <section  id="wait-view">
       <div class="container">
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -210,7 +201,7 @@
       </div>
     </section>
 
-    <section id="game-view">
+    <section  id="game-view">
       <div id="game-view-left">
         <table id="game-layout">
           <tr>
@@ -223,18 +214,17 @@
         </table>
       </div>
       <div id="game-view-right">
-        <!-- <div id="history"><div id="history-text">Welcome to Clam<br>dzd123 passed card 3 to P2</div></div> -->
-          <div class="panel panel-default" style="margin-top:47px">
-            <div class="panel-heading">
-              <h3 class="panel-title">History</h3>
-            </div>
-            <div id="history-container">
-              <table class="table table-condensed table-hover table-striped" id="history" style="text-align:left">
-                <tbody>
-                </tbody>
-              </table>
-            </div>
+        <div class="panel panel-default" style="margin-top:47px">
+          <div class="panel-heading">
+            <h3 class="panel-title">History</h3>
           </div>
+          <div id="history-container">
+            <table class="table table-condensed table-hover table-striped" id="history" style="text-align:left">
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
   </body>
