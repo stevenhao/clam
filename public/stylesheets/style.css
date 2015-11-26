@@ -153,6 +153,10 @@ button, .clickable{
   outline:none;
 }
 
+.hidden {
+  display:none;
+}
+
 .num{
   width:33px;
   height:33px;

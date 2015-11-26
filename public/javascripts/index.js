@@ -566,7 +566,7 @@ updateObjects = function() {
 
   updateButtonVisibility = function(select, submit, filler) {
     for (var el of [select, submit, filler]) {
-      el.attr('hidden', '1');
+      el.addClass('hidden');
     }
 
     var turn = parseInt(gameInfo.public.turn);
@@ -579,16 +579,16 @@ updateObjects = function() {
     print ('updating button visibility', pid, phase);
     if (pid == myPid) {
       if (phase == 'pass') {
-        submit.removeAttr('hidden');
+        submit.removeClass('hidden');
         submit.html('Pass');
       } else if (phase == 'flip') {
-        submit.removeAttr('hidden');
+        submit.removeClass('hidden');
         submit.html('Flip');
       } else if (phase == 'guess') {
-        select.removeAttr('hidden');
+        select.removeClass('hidden');
       }
     } else {
-      filler.removeAttr('hidden');
+      filler.removeClass('hidden');
     }
   }
 
