@@ -390,7 +390,7 @@ renderGame = function() {
   createHandEl = function(pid) {
     var handEl = $('<tr>');
     var nameEl = createNameEl(name).attr('id', nameId(pid));
-    handEl.append(nameEl);
+    handEl.append(nameEl.css({'font-size':'large','font-weight':'bold'}));
 
     for (var idx = 0; idx < 6; ++idx) {
       var cardEl = createCardEl().attr('id', cardId(pid, idx)).attr('pid', pid).attr('idx', idx);
@@ -436,10 +436,10 @@ renderGame = function() {
 
   createSubmitEl = function() {
     var tr = $('<tr>');
-    var td = $('<td>').attr('colspan', '2');
-    var button = $('<button>').attr('id', 'submit');
-    tr.append($('<td>')).append($('<td>')).append($('<td>'));
-    tr.append(td.append(button.append('Submit')));
+    var td = $('<td>').attr('colspan', '6');
+    var button = $('<button>').attr('id', 'submit').addClass('btn btn-default btn-primary');
+    tr.append($('<td>'));
+    tr.append(td.append($('<div style="margin:auto;width:150px">').append(button.append('Submit'))));
     button.click(function() {
       var phase = gameInfo.public.phase;
       print('submit was clicked, phase=', phase);
@@ -454,10 +454,10 @@ renderGame = function() {
 
   createClamEl = function() {
     var tr = $('<tr>');
-    var td = $('<td>').attr('colspan', '2');
-    var button = $('<button>').attr('id', 'clam');
-    tr.append($('<td>')).append($('<td>')).append($('<td>'));
-    tr.append(td.append(button.append('Clam')));
+    var td = $('<td>').attr('colspan', '6');
+    var button = $('<button>').attr('id', 'clam').addClass('btn btn-default btn-primary');
+    tr.append($('<td>'));
+    tr.append(td.append($('<div style="margin:auto;width:150px">').append(button.append('Clam'))));
     button.click(function() {
       actionClam();
     });
@@ -468,8 +468,8 @@ renderGame = function() {
     var tr = $('<tr>');
     var td = $('<td>');
     var span = $('<span>');
-    td.attr('colspan', '6').css('text-align:center');
-    span.attr('id', 'status').css('font-size:30px;font-weight:bold');
+    td.attr('colspan', '6').css({'text-align':'center'});
+    span.attr('id', 'status').css({'font-size':'30px','font-weight':'bold'});
     span.append("It's your turn to pass!");
     tr.append($('<td>')).append(td.append(span));
     return tr;

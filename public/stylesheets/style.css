@@ -70,6 +70,11 @@ body{
   max-height:400px;
   overflow:auto;
 }
+#history-container{
+  height:440px;
+  max-height:440px;
+  overflow:auto;
+}
 #start-game{
   display:none;
 }
@@ -143,13 +148,11 @@ button, .clickable{
 }
 
 /* action button stuff */
-#select, #submit, #filler, #clam{
-  height:35px;
-}
 #submit, #clam{
-  width:170px;
-  font-size:25px;
+  width:150px;
+  outline:none;
 }
+
 .num{
   width:33px;
   height:33px;
@@ -181,32 +184,25 @@ button, .clickable{
 }
 #game-view-right{
   float:left;
-  margin-left:50px;
+  margin-left:60px;
   margin-top:15px;
   text-align:center;
+  width:500px;
 }
 .player-name{
   width:95px;
   text-align:right;
 }
 #history{
-  width:455px;
-  height:235px;
-  border:1px solid;
-  margin-top:10px;
-  text-align:left;
-  max-height:235px;
-  overflow-y:scroll;
+  table-layout: fixed;
+  word-wrap: break-word;
+  
+  overflow:auto;
+}
+#history td{
+  padding-left:15px;
+  padding-right:15px;
 }
 #history-text{
   margin-left:10px;
-}
-#return-buttons{
-  width:450px;
-  margin-top:10px;
-}
-#return-buttons button{
-  width:150px;
-  height:35px;
-  font-size:25px;
 }

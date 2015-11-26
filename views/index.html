@@ -17,7 +17,7 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default" style="margin-bottom:5px">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -216,17 +216,25 @@
           <tr>
             <td>
             </td>
-            <td colspan="6" style="text-align:center">
+            <td colspan="6" style="text-align:center;">
               <span style="font-size:30px;font-weight:bold" id="status">It's your turn to pass!</span>
             </td>
           </tr>
         </table>
       </div>
       <div id="game-view-right">
-        <div>
-          <span style="font-size:30px;font-weight:bold">History</span>
-        </div>
-        <div id="history"><div id="history-text">Welcome to Clam<br>dzd123 passed card 3 to P2</div></div>
+        <!-- <div id="history"><div id="history-text">Welcome to Clam<br>dzd123 passed card 3 to P2</div></div> -->
+          <div class="panel panel-default" style="margin-top:47px">
+            <div class="panel-heading">
+              <h3 class="panel-title">History</h3>
+            </div>
+            <div id="history-container">
+              <table class="table table-condensed table-hover table-striped" id="history" style="text-align:left">
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
       </div>
     </section>
   </body>
