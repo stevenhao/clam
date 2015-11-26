@@ -486,6 +486,8 @@ renderGame = function() {
   $('#game-greeting').html('Your Game ID is '+myGid+'.');
 
   updateObjects();
+  updateButtonOpacity();
+  updateClamOpacity();
 }
 
 updateObjects = function() {
