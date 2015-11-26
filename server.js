@@ -2,16 +2,17 @@ var mysql = require('mysql');
 var passwordHash = require('password-hash');
 
 var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : ''
+  host     : process.env.DB_URL || 'localhost',
+  user     : process.env.DB_USER || 'root',
+  password : process.env.DB_PASSWORD || ''
 });
+
 initDatabase = function() { // in case tables don't exist yet
   var commands = ['create database if not exists clam;',
-  'create table if not exists clam.open(gid varchar(10), game_info varchar(10000));',
-  'create table if not exists clam.active(gid varchar(10), game_info varchar(10000));',
-  'create table if not exists clam.finished(gid varchar(10), game_info varchar(10000));',
-  'create table if not exists clam.users(username varchar(30), password varchar(100));'];
+  'create table if not exists clam.OPEN(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.ACTIVE(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.FINISHED(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.USERS(username varchar(30), password varchar(100));'];
   for (var command of commands) {
     connection.query(command);
   }
@@ -125,6 +126,7 @@ function saveGame(table, game, gid){
   });
   game = game.replace("'", "\\\'");
 
+  table = table.toUpperCase();
   connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result){
     if(err) throw err;
     if(result[0]['COUNT(*)'] == 0){
@@ -141,6 +143,7 @@ function saveGame(table, game, gid){
 }
 
 function deleteGame(table, gid){
+  table = table.toUpperCase();
   // table can be "active", "open", or "finished"
   connection.query("DELETE FROM "+DATABASE+"."+table+"\nWHERE gid='"+gid+"';", function(err, result){
     if(err) throw err;
@@ -165,7 +168,7 @@ function createUser(username, password){
   users[username] = {'password':hashedPassword};
   
 
-  connection.query("INSERT INTO "+DATABASE+".users\n VALUES('"+username+"', '"+hashedPassword+"');", function(err, result){
+  connection.query("INSERT INTO "+DATABASE+".USERS\n VALUES('"+username+"', '"+hashedPassword+"');", function(err, result){
     if(err) throw err;
   });
   return "success";
