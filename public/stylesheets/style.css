@@ -71,9 +71,6 @@ body{
   max-height:300px;
   overflow:auto;
 }
-#start-game{
-  display:none;
-}
 #status{
   font-weight:bold;
   font-size:30pt;
