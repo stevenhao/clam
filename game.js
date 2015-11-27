@@ -26,7 +26,7 @@ function generateCards(num_colors, max_rank, num_players) {
 var Game = function() {
   var game_info, host, true_cards, phase, turn, public_gs, private_gs, sockets, usernames;
   var num_players, gid;
-  init = function(_game_info, _host) {
+  var init = function(_game_info, _host) {
     game_info = _game_info;
     host = host;
 
@@ -56,13 +56,11 @@ var Game = function() {
       private_gs.push(lst);
     }
 
-
-    sockets = [];
     usernames = Utils.fillArray(null, num_players);
 
     updatePublicGS();
     updatePrivateGS();
-  }
+  },
 
   nextTurn = function(arg) {
     var nturn = (turn + 1) % num_players;
@@ -91,7 +89,7 @@ var Game = function() {
   updatePublicGS = function() {
     public_gs.phase = phase;
     public_gs.turn = turn;
-  }
+  },
 
   updatePrivateGS = function() {
     for (var pid = 0; pid < num_players; ++pid) {
@@ -108,10 +106,10 @@ var Game = function() {
         }
       }
     }
-  }
+  },
 
   action = function(pid, _action, args) {
-    actionGuess = function(pid, guess) {
+    var actionGuess = function(pid, guess) {
       if(!(guess instanceof Object) || !('target_id' in guess) || !('target_card' in guess) || !('rank' in guess)
         || isNaN(guess['target_id']) || isNaN(guess['target_card']) || isNaN(guess['rank'])){
         return 'invalid input';
@@ -162,7 +160,7 @@ var Game = function() {
       }
 
       return 'ok';
-    }
+    },
 
     actionPass = function(pid, pass) {
       if(!(pass instanceof Object) || !('card' in pass) || isNaN(pass['card'])) {
@@ -191,7 +189,7 @@ var Game = function() {
       public_gs['history'].push({'move':'pass','id':public_gs['turn'], 'card':card, 'message':message});
       nextTurn();
       return 'ok';
-    }
+    },
 
     actionFlip = function(pid, flip) {
       print('flip', flip);
@@ -223,7 +221,7 @@ var Game = function() {
 
       nextTurn();
       return 'ok';
-    }
+    },
 
     actionClam = function(pid, clamObj) {
       var winner = pid%2;
@@ -269,21 +267,14 @@ var Game = function() {
       updatePublicGS();
       updatePrivateGS();
 
-      for(i = 0; i < num_players; ++i) {
-        if(sockets[i] != null) {
-          update(i, _action);
-        }
-      }
       return 'ok';
     } else {
       return {error: result};
     }
-  }
+  },
 
-  update = function(pid, reason) {
-    if (!sockets[pid].connected) sockets[pid] = null;
-    if (sockets[pid] == null) return;
-
+  getUpdateObj = function(pid) {
+    print('getting updateobj, gid=', game_info.gid)
     var updateObj = {
           'pid':pid,
           'gid':game_info.gid,
@@ -292,9 +283,8 @@ var Game = function() {
           'private':private_gs[pid],
           'usernames':usernames,
     }
-    sockets[pid].emit(reason + ' success', updateObj);
-    print('emmmited', reason + ' success', updateObj);
-  }
+    return updateObj;
+  },
 
   self = { // the new game object
     init: function(game_info, host) { init(game_info, host) },
@@ -303,10 +293,9 @@ var Game = function() {
     getGameInfo: function() { return game_info; },
     getUsernames: function() { return usernames; },
     getHost: function() { return host; },
+    getUpdateObj: function(pid) { return getUpdateObj(pid); },
 
     setHost: function(_host) { host = _host; },
-    setSocket: function(pid, socket) { sockets[pid] = socket; },
-    update: function(pid, reason) { return update(pid, reason); },
 
     repr: function() {
       return JSON.stringify({
@@ -331,11 +320,13 @@ var Game = function() {
       phase = jsonObj.phase;
       host = jsonObj.host;
 
-      sockets = [];
       gid = game_info.gid;
       num_players = game_info.num_players;
+      updatePrivateGS();
+      updatePublicGS();
+      print('loaded');
     },
-    sockets: [], // public list
+    sockets: [],
   }
   return self;
 }

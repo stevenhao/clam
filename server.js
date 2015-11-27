@@ -56,21 +56,21 @@ function newGameId() {
 
 function listGames() {
   games_info = {};
-  for(game in games)
+  for(var game in games)
     games_info[game] = {'usernames':games[game].getUsernames(), 'host':games[game].getHost()};
   return games_info;
 }
 
 function listOpenGames() {
   games_info = {};
-  for(game in open_games)
+  for(var game in open_games)
     games_info[game] = {'usernames':open_games[game].getUsernames(), 'host':open_games[game].getHost()};
   return games_info;
 }
 
 function listFinishedGames() {
   games_info = {};
-  for(game in finished_games)
+  for(var game in finished_games)
     games_info[game] = {'usernames':finished_games[game].getUsernames(), 'host':finished_games[game].getHost()};
   return games_info;
 }
@@ -79,11 +79,11 @@ function loadData() {
   connection.query('SELECT * FROM '+DATABASE+'.ACTIVE;', function(err, rows, fields) {
     if(err) throw err;
     games = {}
-    for(row of rows) {
+    for(var row of rows) {
       var gid = row.gid;
       var game = Game();
       game.load(row.game_info);
-      print('loaded', game.repr());
+      // print('loaded', game.repr());
       games[gid] = game;
     }
   });
@@ -91,7 +91,7 @@ function loadData() {
   connection.query('SELECT * FROM '+DATABASE+'.OPEN;', function(err, rows, fields) {
     if(err) throw err;
     open_games = {}
-    for(row of rows) {
+    for(var row of rows) {
       var gid = row.gid;
       var game = Game();
       game.load(row.game_info);
@@ -102,7 +102,7 @@ function loadData() {
   connection.query('SELECT * FROM '+DATABASE+'.FINISHED;', function(err, rows, fields) {
     if(err) throw err;
     finished_games = {};
-    for(row of rows) {
+    for(var row of rows) {
       var gid = row.gid;
       var game = Game();
       game.load(row.game_info);
@@ -114,7 +114,7 @@ function loadData() {
   connection.query('SELECT * FROM '+DATABASE+'.USERS', function(err, rows, fields) {
     if(err) throw err;
     users = {};
-    for(row of rows) {
+    for(var row of rows) {
       users[row.username] = {'password':row.password};
     }
   });
@@ -139,8 +139,8 @@ function initialize(num_players, num_colors, num_ranks, has_teams) {
 
 function saveGame(table, game, gid) {
   // table can be "active", "open", or "finished"
+  print('save game, gid =', game.getGameInfo().gid, gid);
   game = game.repr(); 
-  print('save game');
   table = table.toUpperCase();
   connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result) {
     if(err) throw err;
@@ -317,6 +317,7 @@ module.exports = function(server) {
     });
 
     socket.on('register', function(_gid) {
+      print('got, ', _gid);
       if(view != 'lobby' && view != 'wait') {
         socket.emit('register error', 'invalid view');
         return;
@@ -336,11 +337,18 @@ module.exports = function(server) {
         return;
       }
 
-      // register socket with pid
-      game.setSocket(pid, socket);
-      game.update(pid, 'register');
-
+      print('registering, pid,gid = ', pid, gid, game.getGameInfo(),
+         game.getUpdateObj(pid));
+      game.sockets.push(socket);
+      socket.emit('register success', game.getUpdateObj(pid));
       view = 'game';
+    });
+
+    socket.on('update', function() {
+      if (view == 'game' && pid != null && gid != null) {
+        var updateObj = games[gid].getUpdateObj(pid);
+        socket.emit('update', updateObj);
+      }
     });
 
     socket.on('logout', function() {
@@ -350,7 +358,7 @@ module.exports = function(server) {
       }
 
       if(view == 'game') {
-        sockets[pid] = null;
+        games[gid].sockets.remove(socket);
       } else if(view == 'wait') {
         open_games[gid].sockets.remove(socket);
       }
@@ -383,7 +391,6 @@ module.exports = function(server) {
           usernames[usernames.indexOf(username)] = null;
 
       usernames[pid] = username;
-      open_games[gid].setSocket(pid, socket);
 
       for (user of open_games[gid].sockets) {
         user.emit('wait update', {
@@ -418,7 +425,7 @@ module.exports = function(server) {
         }
       }
 
-      var connected_users = game['sockets'];
+      var connected_users = game.sockets;
       games[gid] = game;
       delete open_games[gid];
 
@@ -476,7 +483,9 @@ module.exports = function(server) {
       if (result != 'ok') {
         socket.emit('guess error', result.error);
       } else {
-        // TODO: handle socket code here (not game.js)
+        for (var skt of games[gid].sockets) {
+          skt.emit('guess success');
+        }
         saveGame('active', games[gid], gid);
       }
     });
@@ -496,9 +505,14 @@ module.exports = function(server) {
       var result = games[gid].action(pid, 'pass', pass);
       if (result != 'ok') {
         socket.emit('pass error', result.error);
+      } else {
+        for (var skt of games[gid].sockets) {
+          print('emmitting pass success')
+          skt.emit('pass success');
+        }
+        saveGame('active', games[gid], gid);
       }
 
-      saveGame('active', games[gid], gid);
     });
 
     socket.on('flip', function(flip) {
@@ -518,9 +532,12 @@ module.exports = function(server) {
       var result = games[gid].action(pid, 'flip', flip);
       if (result != 'ok') {
         socket.emit('flip error', result.error);
+      } else {
+        for (var skt of games[gid].sockets) {
+          skt.emit('flip success');
+        }
+        saveGame('active', games[gid], gid);
       }
-
-      saveGame('active', games[gid], gid);
     });
     
     socket.on('clam', function(clamObj) {
@@ -533,6 +550,11 @@ module.exports = function(server) {
       var error = games[gid].action(pid, 'clam', clamObj);
       if (error != 'ok') {
         socket.emit('flip error', result.error);
+      } else {
+        for (var skt of games[gid].sockets) {
+          skt.emit('clam success');
+        }
+        saveGame('active', games[gid], gid);
       }
 
       finished_games[gid] = games[gid];
@@ -547,11 +569,10 @@ module.exports = function(server) {
         socket.emit('game_back error', 'invalid view');
         return;
       }
-
-      games[gid].setSocket(pid, null);
       gid = null;
       pid = null;
       view = 'lobby';
+      print('game back.');
       socket.emit('game_back success', {
         'games': listGames(),
         'openGames': listOpenGames()

@@ -123,11 +123,12 @@ window.onload = function() {
 
   // Lobby Listeners
   socket.on('register success', function(_gameInfo) {
+    print('register success?');
     gameInfo = _gameInfo;
     if(myView != 'lobby' && !(myView == 'wait' && gameInfo.gid == myGid))
       return;
 
-    console.log('register success,', gameInfo);
+    print('register success,', gameInfo);
     messageCounter = 0;
     myGid = gameInfo.gid;
     myPid = gameInfo.pid;
@@ -204,15 +205,26 @@ window.onload = function() {
   })
 
   // Game Listeners
+  socket.on('update', function(_gameInfo) {
+    gameInfo = _gameInfo;
+    if(myView == 'game') {
+      updateGame();
+    }
+  });
+
   for(game_event of ['pass success', 'guess success', 'flip success', 'clam success']) {
-    socket.on(game_event, function(_gameInfo) {
-      gameInfo = _gameInfo;
-      if(myView == 'game') {
-        updateGame();
-      }
-      deselect();
+    socket.on(game_event, function() {
+      socket.emit('update');
     });
   }
+
+  socket.on('update', function(_gameInfo) {
+    gameInfo = _gameInfo;
+    if(myView == 'game') {
+      updateGame();
+    }
+    deselect();
+  });
 
   socket.on('game_back success', function(lobby_data) {
     if(myView != 'game') return;
@@ -280,6 +292,7 @@ renderLobby = function(games, open_games) {
 
   $('.game-cell').click(function() {
     var gameId = $(this).attr('gid');
+    print('emitting', gameId);
     socket.emit('register', gameId);
   });
 
