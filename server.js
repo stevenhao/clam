@@ -188,6 +188,16 @@ function createUser(username, password) {
   return "success";
 }
 
+function bcast(connections, event, args) {
+  for (var user of connections) {
+    if (!user.connected) {
+      // connections.remove(user);
+    } else {
+      user.emit(event, args);
+    }
+  }
+}
+
 module.exports = function(server) {
   var io = require('socket.io')(server);
 
@@ -533,10 +543,7 @@ module.exports = function(server) {
       if (result != 'ok') {
         socket.emit('flip error', result.error);
       } else {
-        for (var skt of games[gid].sockets) {
-          skt.emit('flip success');
-        }
-        saveGame('active', games[gid], gid);
+        bcast(games[gid].sockets, 'flip success');
       }
     });
     
@@ -581,7 +588,7 @@ module.exports = function(server) {
 
     socket.on('disconnect', function() {
       if(view == 'game') {
-        games[gid].sockets[pid] = null;
+        games[gid].sockets.remove(socket);
       } else if(view == 'wait') {
         print('disconnected from wait', gid);
         open_games[gid]['sockets'].remove(socket);
