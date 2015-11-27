@@ -551,7 +551,7 @@ updateObjects = function() {
     }
   }
 
-  updateButtonVisibility = function(select, submit, filler) {
+  updateButtonVisibility = function(select, submit, filler, clam) {
     for (var el of [select, submit, filler]) {
       el.addClass('hidden');
     }
@@ -576,6 +576,12 @@ updateObjects = function() {
     } else {
       filler.removeClass('hidden');
     }
+
+    if (phase == 'over') {
+      clam.addClass('hidden');
+    } else {
+      clam.removeClass('hidden');
+    }
   }
 
   updateHandEl = function(pid) {
@@ -599,7 +605,7 @@ updateObjects = function() {
   }
   updateStatusEl($('#status'));
   updateHistoryEl($('#history-text'));
-  updateButtonVisibility($('#select'), $('#submit'), $('#filler'));
+  updateButtonVisibility($('#select'), $('#submit'), $('#filler'), $('#clam'));
 }
 
 updateButtonOpacity = function() {
