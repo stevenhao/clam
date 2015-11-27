@@ -123,7 +123,6 @@ window.onload = function() {
 
   // Lobby Listeners
   socket.on('register success', function(_gameInfo) {
-    print('register success?');
     gameInfo = _gameInfo;
     if(myView != 'lobby' && !(myView == 'wait' && gameInfo.gid == myGid))
       return;
@@ -193,7 +192,6 @@ window.onload = function() {
   socket.on('start', function(startInfo) {
     if (myView == 'wait' && myGid == startInfo['gid']) {
       if(startInfo['usernames'].indexOf(myUsername) != -1) {
-        print('registering');
         socket.emit('register', startInfo['gid']);
       }
     }
@@ -292,7 +290,6 @@ renderLobby = function(games, open_games) {
 
   $('.game-cell').click(function() {
     var gameId = $(this).attr('gid');
-    print('emitting', gameId);
     socket.emit('register', gameId);
   });
 
@@ -819,7 +816,7 @@ actionFlip = function() {
 
 actionClam = function() {
   var clamObj = getClamObj();
-  print("clamming", clamObj);
+  print("Clamming", clamObj);
 
   var ok = validClamObj(clamObj);
   if (!ok) {

@@ -83,7 +83,6 @@ function loadData() {
       var gid = row.gid;
       var game = Game();
       game.load(row.game_info);
-      // print('loaded', game.repr());
       games[gid] = game;
     }
   });

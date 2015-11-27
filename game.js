@@ -324,7 +324,6 @@ var Game = function() {
       num_players = game_info.num_players;
       updatePrivateGS();
       updatePublicGS();
-      print('loaded');
     },
     sockets: [],
   }
