@@ -59,6 +59,7 @@ window.onload = function() {
   });
 
   socket.on('user_register denied', function(message) {
+    console.log('what');
     $('#register-error').html(message);
     unhide($('#register-error'));
     $('#new-password, #new-confirm-password, #new-username').val('');

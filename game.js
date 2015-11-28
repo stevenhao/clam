@@ -147,13 +147,13 @@ var Game = function() {
         // guess is correct
         // updates public gamestate
         true_card.flipped = true;
-        var message = usernames[pid]+' CORRECTLY guessed card '+(card+1)+' of '+usernames[target_id]+"'s hand as "+rank;
+        var message = '<b>'+usernames[pid]+'</b> CORRECTLY guessed card '+(card+1)+' of <b>'+usernames[target_id]+"'s</b> hand as "+rank;
         // updates guess history
         public_gs['history'].push({ message: message });
         nextTurn({correct_guess: true});
       } else {
         // guess is incorrect
-        var message = usernames[pid]+' INCORRECTLY guessed card '+(card+1)+' of '+usernames[target_id]+"'s hand as "+rank;
+        var message = '<b>'+usernames[pid]+'</b> INCORRECTLY guessed card '+(card+1)+' of <b>'+usernames[target_id]+"'s</b> hand as "+rank;
         // updates guess history
         public_gs['history'].push({ message: message });
         nextTurn({correct_guess: false});
@@ -185,7 +185,7 @@ var Game = function() {
       private_gs[turn][pid][card].visible = true;
 
       // updates pass history
-      var message = usernames[pid]+' passed card '+(card+1)+' to '+usernames[public_gs['turn']];
+      var message = '<b>'+usernames[pid]+'</b> passed card '+(card+1)+' to <b>'+usernames[public_gs['turn']]+'</b>';
       public_gs['history'].push({'move':'pass','id':public_gs['turn'], 'card':card, 'message':message});
       nextTurn();
       return 'ok';
@@ -216,7 +216,7 @@ var Game = function() {
       true_card.flipped = true;
 
       // updates guess history
-      var message = usernames[pid]+' flipped card '+(card+1);
+      var message = '<b>'+usernames[pid]+'</b> flipped card '+(card+1);
       public_gs['history'].push({ message:message });
 
       nextTurn();
@@ -240,9 +240,9 @@ var Game = function() {
       public_gs['winner'] = winner;
       var message = "";
       if(winner == pid%2){
-        message = usernames[pid]+' clams successfully!\n'+usernames[pid]+' and '+usernames[(pid+2)%num_players]+' WIN :)';
+        message = '<b>'+usernames[pid]+'</b> clams successfully!\n'+'<b>'+usernames[pid]+'</b> and <b>'+usernames[(pid+2)%num_players]+'</b> WIN :)';
       }else{
-        message = usernames[pid]+' clams incorrectly!\n'+usernames[(pid+1)%num_players]+' and '+usernames[(pid+3)%num_players]+' WIN :)';
+        message = '<b>'+usernames[pid]+'</b> clams incorrectly!\n'+'<b>'+usernames[(pid+1)%num_players]+'</b> and <b>'+usernames[(pid+3)%num_players]+'</b> WIN :)';
       }
       public_gs['history'].push({ message:message });
 
