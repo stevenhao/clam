@@ -22,9 +22,9 @@ var connection = mysql.createConnection({
 
 initDatabase = function() { // in case tables don't exist yet
   var commands = ['create database if not exists clam;',
-  'create table if not exists clam.OPEN(gid varchar(10), game_info varchar(10000));',
-  'create table if not exists clam.ACTIVE(gid varchar(10), game_info varchar(10000));',
-  'create table if not exists clam.FINISHED(gid varchar(10), game_info varchar(10000));',
+  'create table if not exists clam.OPEN(gid varchar(50), game_info varchar(10000));',
+  'create table if not exists clam.ACTIVE(gid varchar(50), game_info varchar(10000));',
+  'create table if not exists clam.FINISHED(gid varchar(50), game_info varchar(10000));',
   'create table if not exists clam.USERS(username varchar(30), password varchar(100));'];
   for (var command of commands) {
     connection.query(command);
@@ -47,7 +47,7 @@ var users = {};
 loadData();
 
 function newGameId() {
-  var newId = Utils.randomString(6);
+  var newId = Utils.randomWords(2);
   if(!(newId in games) && !(newId in open_games) && !(newId in finished_games)) {
     return newId;
   }
@@ -296,7 +296,6 @@ module.exports = function(server) {
         'games': listGames(),
         'openGames': listOpenGames()
       });
-      print('updated all games');
       socket.emit('create success', id);
       saveGame('open', game, id);
     });

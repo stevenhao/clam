@@ -1,3 +1,15 @@
+var fs = require('fs');
+
+function initWords(){
+  var FILE = 'words.csv';
+  fs.readFile(FILE, 'utf8', function(err, data){
+    if(err) throw err;
+    words = data.split('\n');
+  });
+}
+
+initWords();
+
 var util = {
   // creates array of length 'len' with values 'value'
   fillArray: function(value, len) {
@@ -27,12 +39,16 @@ var util = {
     return array;
   },
 
-  // returns random alphanumeric string of len length
-  randomString: function(length) {
-    chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var result = '';
-    for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
-    return result;
+  // returns a string of N random words
+  randomWords: function(N) {
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    var word = "";
+    for(i = 0; i < N; ++i) {
+      word += words[getRandomInt(0, words.length - 1)] + " ";
+    }
+    return word.substring(0, word.length - 1);
   },
 
 
