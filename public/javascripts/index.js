@@ -30,7 +30,6 @@ setView = function(view) { // hide everything but view
 
 window.onload = function() {
   socket = io();
-  console.log('index.js is alive.');
   myView = 'login';
   hideView('lobby');
   hideView('game');
@@ -55,11 +54,9 @@ window.onload = function() {
   socket.on('login denied', function(message) {
     $('#user-auth').addClass('has-error');
     $('#password').val('');
-    console.log('Login Denied');
   });
 
   socket.on('user_register denied', function(message) {
-    console.log('what');
     $('#register-error').html(message);
     unhide($('#register-error'));
     $('#new-password, #new-confirm-password, #new-username').val('');
@@ -128,7 +125,6 @@ window.onload = function() {
     if(myView != 'lobby' && !(myView == 'wait' && gameInfo.gid == myGid))
       return;
 
-    print('register success,', gameInfo);
     messageCounter = 0;
     myGid = gameInfo.gid;
     myPid = gameInfo.pid;
@@ -679,7 +675,6 @@ updateGame = function() {
 }
 
 selectCard = function(card) {
-  console.log('select card', card);
   if (card.hasClass('selected')) {
     card.removeClass('selected');
     selectedCard = null;
@@ -785,7 +780,6 @@ actionGuess = function(rank) {
     if (pid != myPid && pid != partner(myPid)) {
       var guessObj = {'target_id': pid, 'target_card': idx, 'rank': rank};
       socket.emit('guess', guessObj);
-      print('Guessing,', guessObj);
     }
   }
 }
@@ -797,7 +791,6 @@ actionPass = function() {
     if (pid == myPid) {
       var passObj = {'card': idx};
       socket.emit('pass', passObj);
-      print('Passing,', passObj);
     }
     deselect();
   }
@@ -810,20 +803,16 @@ actionFlip = function() {
     if (pid == myPid) {
       var flipObj = {'card': idx};
       socket.emit('flip', flipObj);
-      print('Flipping,', flipObj);
     }
   }
 }
 
 actionClam = function() {
   var clamObj = getClamObj();
-  print("Clamming", clamObj);
 
   var ok = validClamObj(clamObj);
   if (!ok) {
-    print("clam is not ok");
   } else {
-    print("clam is ok, sending to server")
     socket.emit('clam', clamObj);
   }
 }

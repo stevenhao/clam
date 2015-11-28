@@ -138,7 +138,6 @@ function initialize(num_players, num_colors, num_ranks, has_teams) {
 
 function saveGame(table, game, gid) {
   // table can be "active", "open", or "finished"
-  print('save game, gid =', game.getGameInfo().gid, gid);
   game = game.repr(); 
   table = table.toUpperCase();
   connection.query("SELECT COUNT(*) FROM "+DATABASE+"."+table+" WHERE gid = '" + gid + "';", function(err, result) {
@@ -245,7 +244,6 @@ module.exports = function(server) {
     socket.on('user_register', function(user_info) {
       var _username = user_info['username'];
       var _password = user_info['password'];
-      print( 'register user ', _username, _password);
 
       if(view != 'login') {
         socket.emit('user_register error', 'invalid view');
@@ -263,7 +261,6 @@ module.exports = function(server) {
       }
 
       var message = createUser(_username, _password);
-      print( 'register user ', message);
       if(message == "success") {
         socket.emit('user_register success', {'username':_username, 'password':_password});
       } else{
@@ -325,7 +322,6 @@ module.exports = function(server) {
     });
 
     socket.on('register', function(_gid) {
-      print('got, ', _gid);
       if(view != 'lobby' && view != 'wait') {
         socket.emit('register error', 'invalid view');
         return;
@@ -345,8 +341,6 @@ module.exports = function(server) {
         return;
       }
 
-      print('registering, pid,gid = ', pid, gid, game.getGameInfo(),
-         game.getUpdateObj(pid));
       game.sockets.push(socket);
       socket.emit('register success', game.getUpdateObj(pid));
       view = 'game';
@@ -521,7 +515,6 @@ module.exports = function(server) {
         socket.emit('pass error', result.error);
       } else {
         for (var skt of games[gid].sockets) {
-          print('emmitting pass success')
           skt.emit('pass success');
         }
         saveGame('active', games[gid], gid);
@@ -530,7 +523,6 @@ module.exports = function(server) {
     });
 
     socket.on('flip', function(flip) {
-      print('flip receive', flip);
       // flip is {card}
 
       if(view != 'game') {
@@ -583,7 +575,6 @@ module.exports = function(server) {
       gid = null;
       pid = null;
       view = 'lobby';
-      print('game back.');
       socket.emit('game_back success', {
         'games': listGames(),
         'openGames': listOpenGames()
@@ -592,12 +583,10 @@ module.exports = function(server) {
 
     socket.on('disconnect', function() {
       if(view == 'game') {
-        print('gid=', gid);
         if (gid in games) {
           games[gid].sockets.remove(socket);
         }
       } else if(view == 'wait') {
-        print('disconnected from wait', gid);
         open_games[gid]['sockets'].remove(socket);
       }
     });

@@ -192,7 +192,6 @@ var Game = function() {
     },
 
     actionFlip = function(pid, flip) {
-      print('flip', flip);
       if(!(flip instanceof Object) || !('card' in flip) || isNaN(flip['card'])) {
         return 'invalid input';
       }
@@ -236,6 +235,10 @@ var Game = function() {
           break;
       }
 
+      for (i = 0; i < num_players; ++i)
+        for (j = 0; j < true_cards[i].length; ++j)
+          true_cards[i][j].flipped = true;
+
       phase = 'over';
       public_gs['winner'] = winner;
       var message = "";
@@ -262,7 +265,6 @@ var Game = function() {
       result = actionClam(pid, args);
     }
 
-    print('result', result);
     if (result == 'ok') {
       updatePublicGS();
       updatePrivateGS();
@@ -274,7 +276,6 @@ var Game = function() {
   },
 
   getUpdateObj = function(pid) {
-    print('getting updateobj, gid=', game_info.gid)
     var updateObj = {
           'pid':pid,
           'gid':game_info.gid,
