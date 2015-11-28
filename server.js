@@ -354,7 +354,13 @@ module.exports = function(server) {
 
     socket.on('update', function() {
       if (view == 'game' && pid != null && gid != null) {
-        var updateObj = games[gid].getUpdateObj(pid);
+        var game;
+        if (gid in games) {
+          game = games[gid];
+        } else if (gid in finished_games) {
+          game = finished_games[gid];
+        }
+        var updateObj = game.getUpdateObj(pid);
         socket.emit('update', updateObj);
       }
     });
@@ -586,7 +592,10 @@ module.exports = function(server) {
 
     socket.on('disconnect', function() {
       if(view == 'game') {
-        games[gid].sockets.remove(socket);
+        print('gid=', gid);
+        if (gid in games) {
+          games[gid].sockets.remove(socket);
+        }
       } else if(view == 'wait') {
         print('disconnected from wait', gid);
         open_games[gid]['sockets'].remove(socket);
