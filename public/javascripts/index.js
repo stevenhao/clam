@@ -491,6 +491,10 @@ renderGame = function() {
   $('#history-text').empty();
   $('#game-greeting').html('Your Game ID is '+myGid+'.');
 
+  window.addEventListener('beforeunload', function(event) {
+    event.returnValue = "To go back to lobby, use 'Back to Lobby' button.";
+  }); 
+
   updateObjects();
   updateButtonOpacity();
   updateClamOpacity();
