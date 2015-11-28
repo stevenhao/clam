@@ -9,10 +9,11 @@ for filename in file_names:
     f = open(folder_name+filename)
     for line in f.readlines():
         word = line.strip()
-        if count % 25 == 0:
+        if count % 6 == 0 and len(word) < 7:
             words.append(word)
         count += 1
     f.close()
 
 for word in words:
     print word
+print len(words)
