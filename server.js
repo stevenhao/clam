@@ -120,19 +120,20 @@ function loadData() {
 }
 
 // initializes game info, and public and private gamestates
-function initialize(num_players, num_colors, num_ranks, has_teams) {
+// function initialize(num_players, num_colors, num_ranks, has_teams) {
+function initialize(ginfo) {
   var game_info = {
-    'num_players':num_players,
-    'num_colors':num_colors,
-    'num_ranks':num_ranks,
-    'has_teams':has_teams,
-    'statuses':Utils.fillArray('off', num_players),
+    'num_players':ginfo.num_players,
+    'num_colors':ginfo.num_colors,
+    'num_ranks':ginfo.num_ranks,
+    'has_teams':ginfo.has_teams,
+    'statuses':Utils.fillArray('off', ginfo.num_players),
     'chat_log':[],
     'gid':newGameId(),
   };
 
   var game = Game();
-  game.init(game_info, null);
+  var errors = game.init(game_info, null);
   return game;
 }
 
@@ -274,16 +275,27 @@ module.exports = function(server) {
         return;
       }
 
-      if(!(ginfo instanceof Object) || !('num_players' in ginfo) 
-         || !('num_colors' in ginfo) || !('num_ranks' in ginfo)
-         || isNaN(ginfo['num_players']) || isNaN(ginfo['num_colors']) 
-         || isNaN(ginfo['num_ranks']) || ginfo['num_players'] <= 1 
-         || ginfo['num_colors'] <= 0 || ginfo['num_ranks'] <= 0) {
-        socket.emit('create error', 'invalid input');
-      return;
+      function validate() {
+        if(!(ginfo instanceof Object) || !('num_players' in ginfo) 
+           || !('num_colors' in ginfo) || !('num_ranks' in ginfo)
+           || isNaN(ginfo['num_players']) || isNaN(ginfo['num_colors']) 
+           || isNaN(ginfo['num_ranks']) || ginfo['num_players'] <= 1 
+           || ginfo['num_colors'] <= 0 || ginfo['num_ranks'] <= 0) {
+          return 'invalid input';
+        }
+        if (ginfo.has_teams && ginfo.num_players != 4) {
+          return 'team games must have 4 players (for now)';
+        }
+        return 'ok';
+      }
+      var errors = validate();
+      if (errors != 'ok') {
+        socket.emit('err', {action: 'create', reason: errors});
+        return;
       }
 
-      var game = initialize(ginfo['num_players'], ginfo['num_colors'], ginfo['num_ranks'], true);
+      // var game = initialize(ginfo['num_players'], ginfo['num_colors'], ginfo['num_ranks'], true);
+      var game = initialize(ginfo);
       // var game = Object.create(Game).init(ginfo, username);
       var id = game.getGameInfo().gid;
       open_games[id] = game;

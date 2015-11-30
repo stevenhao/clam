@@ -169,7 +169,7 @@ button, .clickable{
 #game-layout td{
   padding:0px;
 }
-#game-layout{
+#game-layout, table{
   border-collapse:separate;
   border-spacing:10px 10px;
 }

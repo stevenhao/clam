@@ -5,6 +5,8 @@ selectedCard = null;
 myUsername = null;
 print = console.log.bind(console);
 messageCounter = 0;
+num_players = 4;
+num_cards = 6;
 
 unhide = function(sel) {
   sel.removeClass('hidden');
@@ -28,6 +30,14 @@ setView = function(view) { // hide everything but view
   unhideView(myView);
 }
 
+range = function(n) {
+  var ret = [];
+  for(var i = 0; i < n; ++i) {
+    ret.push(i);
+  }
+  return ret;
+}
+
 window.onload = function() {
   socket = io();
   myView = 'login';
@@ -35,6 +45,9 @@ window.onload = function() {
   hideView('game');
   hideView('wait');
 
+  socket.on('err', function(error) {
+    print('error:', error);
+  });
   // Login Listeners
   socket.on('login success', function(lobby_data) {
     if(myView != 'login')
@@ -122,6 +135,10 @@ window.onload = function() {
   // Lobby Listeners
   socket.on('register success', function(_gameInfo) {
     gameInfo = _gameInfo;
+    var g = gameInfo.game_info;
+    num_players = g.num_players;
+    num_cards = g.num_ranks * g.num_colors / g.num_players;
+
     if(myView != 'lobby' && !(myView == 'wait' && gameInfo.gid == myGid))
       return;
 
@@ -155,11 +172,15 @@ window.onload = function() {
   // Lobby Javascript
   $('#create-game').click(function() {
     if (myView != 'lobby') return;
-    socket.emit('create', {
-      'num_players': 4,
-      'num_colors': 2,
-      'num_ranks': 12,
-    });
+    //TODO: make view
+    var createObj = {
+      num_players: parseInt($('#num-players').val()),
+      num_colors: 2,
+      num_ranks: parseInt($('#num-ranks').val()),
+      has_teams: $('#has-teams').is(':checked'),
+    }
+    print('emitting create:', createObj);
+    socket.emit('create', createObj);
     return false;
   });
 
@@ -202,6 +223,10 @@ window.onload = function() {
   // Game Listeners
   socket.on('update', function(_gameInfo) {
     gameInfo = _gameInfo;
+    var g = gameInfo.game_info;
+    num_players = g.num_players;
+    num_cards = g.num_ranks * g.num_colors / g.num_players;
+    print('updated game', gameInfo);
     if(myView == 'game') {
       updateGame();
     }
@@ -310,11 +335,18 @@ renderWait = function(joinInfo) {
   $('#players-list').html('');
   $('#game-id').html(joinInfo.gid)
   $('#host').html(joinInfo.host);
-  var pids = [0, 2, 1, 3];
-  for (var i = 0; i < 4; ++i) {
+  var pids;
+  if (joinInfo.game_info.has_teams) {
+    // num_players = 4
+    pids = [0, 2, 1, 3];
+  } else {
+    pids = range(num_players);
+  }
+
+  for (var pid of pids) {
     var tr = $('<tr>');
     var td = $('<td>').addClass('players-list-cell clickable');
-    td.attr('id', playersListCellId(pids[i])).attr('pid', pids[i]);
+    td.attr('id', playersListCellId(pid)).attr('pid', pid);
     $('#players-list').append(tr.append(td));
   }
 
@@ -329,13 +361,24 @@ renderWait = function(joinInfo) {
 
 updateWait = function(joinInfo) {
   var filled = true;
+
   for (var i = 0; i < joinInfo.usernames.length; ++i) {
-    var team = i%2 == 0 ? 'Team A' : 'Team B';
-    if (joinInfo.usernames[i] == null) {
-      $('#' + playersListCellId(i)).html('Join '+team);
-      filled = false;
-    } else{
-      $('#' + playersListCellId(i)).html('<b>'+team+': </b>'+joinInfo.usernames[i]);
+    if (joinInfo.game_info.has_teams) {
+      var team = i%2 == 0 ? 'Team A' : 'Team B';
+      if (joinInfo.usernames[i] == null) {
+        $('#' + playersListCellId(i)).html('Join '+team);
+        filled = false;
+      } else{
+        $('#' + playersListCellId(i)).html('<b>'+team+': </b>'+joinInfo.usernames[i]);
+      }
+    } else {
+      var joinLabel = 'Player ' + (i + 1);
+      if (joinInfo.usernames[i] == null) {
+        $('#' + playersListCellId(i)).html('Play as ' + joinLabel);
+        filled = false;
+      } else{
+        $('#' + playersListCellId(i)).html('<b>'+joinLabel+': </b>' + joinInfo.usernames[i]);
+      }
     }
   }
 
@@ -350,7 +393,11 @@ updateWait = function(joinInfo) {
 // game code
 
 partner = function(x) {
-  return (x + 2) % 4;
+  if (gameInfo.game_info.has_teams) {
+    return (x + 2) % 4;
+  } else {
+    return -1;
+  }
 }
 
 cardId = function(pid, idx) {
@@ -394,7 +441,7 @@ renderGame = function() {
     var nameEl = createNameEl().attr('id', nameId(pid));
     handEl.append(nameEl.css({'font-size':'large','font-weight':'bold'}));
 
-    for (var idx = 0; idx < 6; ++idx) {
+    for (var idx = 0; idx < num_cards; ++idx) {
       var cardEl = createCardEl().attr('id', cardId(pid, idx)).attr('pid', pid).attr('idx', idx);
       cardEl.dblclick(function(e) {
         selectCard($(this));
@@ -411,32 +458,28 @@ renderGame = function() {
   }
 
   createSelectEl = function() {
-    var tr = $('<tr>').attr('id', 'select');
-    tr.append($('<td>'));
-    for (var i = 1; i <= 12; i += 2) {
+    var tr = $('<tr>').attr('id', 'select').attr('align', 'center');
+    for (var i = 1; i <= gameInfo.game_info.num_ranks; ++i) {
       var td = $('<td>');
       tr.append(td);
-      for (var j = i; j <= i + 1; ++j) {
-        var div = $('<div>').addClass('num');
-        if (j % 2 == 1) {
-          div.addClass('left-num');
-        } else {
-          div.addClass('right-num');
-        }
-        td.append(div.append($('<span>').append(j)));
+      var div = $('<div>').addClass('num');
+      td.append(div.append($('<span>').append(i)));
 
-        div.attr('value', j);
-        div.click(function() {
-          actionGuess($(this).attr('value'));
-        });
-      }
+      div.attr('value', i);
+      div.click(function() {
+        actionGuess($(this).attr('value'));
+      });
     }
-    return tr;
+
+    var ntr = $('<tr>').append($('<td>'));
+    ntr.append($('<td colspan="' + num_cards *2 + '">').append($('<table style="width:100%;position:relative;left:-5px">').append(tr)));
+
+    return ntr;
   }
 
   createSubmitEl = function() {
     var tr = $('<tr>');
-    var td = $('<td>').attr('colspan', '6');
+    var td = $('<td>').attr('colspan', num_cards);
     var button = $('<button>').attr('id', 'submit').addClass('btn btn-default btn-primary');
     tr.append($('<td>'));
     tr.append(td.append($('<div style="margin:auto;width:150px">').append(button.append('Submit'))));
@@ -453,7 +496,7 @@ renderGame = function() {
 
   createClamEl = function() {
     var tr = $('<tr>');
-    var td = $('<td>').attr('colspan', '6');
+    var td = $('<td>').attr('colspan', num_cards);
     var button = $('<button>').attr('id', 'clam').addClass('btn btn-default btn-primary');
     tr.append($('<td>'));
     tr.append(td.append($('<div style="margin:auto;width:150px">').append(button.append('Clam'))));
@@ -467,9 +510,8 @@ renderGame = function() {
     var tr = $('<tr>');
     var td = $('<td>');
     var span = $('<span>');
-    td.attr('colspan', '6').css({'text-align':'center'});
+    td.attr('colspan', num_cards).css({'text-align':'center'});
     span.attr('id', 'status').css({'font-size':'30px','font-weight':'bold'});
-    span.append("It's your turn to pass!");
     tr.append($('<td>')).append(td.append(span));
     return tr;
   }
@@ -478,7 +520,14 @@ renderGame = function() {
   table.empty();
 
   table.append(createStatusEl());
-  var pids = [myPid, (myPid + 2) % 4, (myPid + 1) % 4, (myPid + 3) % 4];
+  if (gameInfo.game_info.has_teams) {
+    pids = [myPid, (myPid + 2) % 4, (myPid + 1) % 4, (myPid + 3) % 4];
+  } else {
+    pids = range(num_players);
+    for (var i = 0; i < num_players; ++i) {
+      pids[i] = (pids[i] + myPid) % num_players;
+    }
+  }
   for (var pid of pids) {
     table.append(createHandEl(pid));
   }
@@ -546,7 +595,12 @@ updateObjects = function() {
         var pid = turn;
         return names[pid] + ' to flip';
       } else if (phase == 'over') {
-        var msg = winner == myPid %2 ? ' win!' : ' lose!';
+        var msg;
+        if (gameInfo.game_info.has_teams) {
+          msg = winner % 2 == myPid %2 ? ' win!' : ' lose!';
+        } else {
+          msg = winner == myPid ? 'win!' : 'lose!';
+        }
         return 'Game Over! You '+msg;
       }
     }
@@ -601,7 +655,7 @@ updateObjects = function() {
     var name = gameInfo.usernames[pid];
     nameEl.html(name);
 
-    for(var idx = 0; idx < 6; ++idx) {
+    for(var idx = 0; idx < num_cards; ++idx) {
       var cardEl = $('#' + cardId(pid, idx));
       var cardInfo;
       var phase = gameInfo.public.phase;
@@ -611,7 +665,7 @@ updateObjects = function() {
     }
   }
 
-  for(var pid = 0; pid < 4; ++pid) {
+  for(var pid = 0; pid < num_players; ++pid) {
     updateHandEl(pid);
   }
   updateStatusEl($('#status'));
@@ -714,9 +768,9 @@ validClamObj = function(guessObj) {
 
 getClamObj = function() {
   var clamObj = [];
-  for (var pid = 0; pid < 4; ++pid) {
+  for (var pid = 0; pid < num_players; ++pid) {
     var curList = [];
-    for (var idx = 0; idx < 6; ++idx) {
+    for (var idx = 0; idx < num_cards; ++idx) {
       var cardEl = $('#' + cardId(pid, idx));
       var guess = 0;
       if (cardEl.hasClass('known')) {
@@ -742,6 +796,9 @@ canGuess = function(rank) {
   }
 
   if (selectedCard != null) {
+    if (selectedCard.hasClass('flipped')) {
+      return false;
+    }
     var pid = parseInt(selectedCard.attr('pid'));
     if (pid != myPid && pid != partner(myPid)) {
       var color = getColor(selectedCard);

@@ -25,12 +25,13 @@ function generateCards(num_colors, max_rank, num_players) {
 
 var Game = function() {
   var game_info, host, true_cards, phase, turn, public_gs, private_gs, sockets, usernames;
-  var num_players, gid;
+  var num_players, gid, num_cards;
   var init = function(_game_info, _host) {
     game_info = _game_info;
     host = host;
 
     num_players = game_info.num_players;
+    num_cards = game_info.num_ranks * game_info.num_colors / num_players;
     gid = game_info.gid;
 
     true_cards = generateCards(game_info.num_colors, game_info.num_ranks, game_info.num_players);
@@ -47,7 +48,7 @@ var Game = function() {
       var lst = [];
       for (var pp = 0; pp < num_players; ++pp) {
         var nlst = [];
-        for(var idx = 0; idx < 6; ++idx) {
+        for(var idx = 0; idx < num_cards; ++idx) {
           var tcard = true_cards[pp][idx];
           nlst.push({rank: 0, color: tcard.color, visible: false, flipped: false});
         }
@@ -67,7 +68,11 @@ var Game = function() {
     if (phase == 'guess') {
       var success = arg.correct_guess;
       if (success) {
-        phase = 'pass';
+        if (game_info.has_teams) {
+          phase = 'pass';
+        } else {
+          phase = 'guess';
+        }
         turn = nturn;
       } else {
         phase = 'flip';
@@ -94,7 +99,7 @@ var Game = function() {
   updatePrivateGS = function() {
     for (var pid = 0; pid < num_players; ++pid) {
       for (var pp = 0; pp < num_players; ++pp) {
-        for(var idx = 0; idx < 6; ++idx) {
+        for(var idx = 0; idx < num_cards; ++idx) {
           var pcard = private_gs[pid][pp][idx], tcard = true_cards[pp][idx];
           pcard.visible |= pid == pp;
           pcard.flipped |= tcard.flipped;
@@ -223,11 +228,11 @@ var Game = function() {
     },
 
     actionClam = function(pid, clamObj) {
-      var winner = pid%2;
+      var winner = pid;
       for (i = 0; i < num_players; ++i){
         for (j = 0; j < true_cards[i].length; ++j){
           if(clamObj[i][j] != true_cards[i][j]['rank']){
-            winner = 1 - winner;
+            winner = -winner;
             break;
           }
         }
@@ -242,10 +247,19 @@ var Game = function() {
       phase = 'over';
       public_gs['winner'] = winner;
       var message = "";
-      if(winner == pid%2){
-        message = '<b>'+usernames[pid]+'</b> clams successfully!\n'+'<b>'+usernames[pid]+'</b> and <b>'+usernames[(pid+2)%num_players]+'</b> WIN :)';
-      }else{
-        message = '<b>'+usernames[pid]+'</b> clams incorrectly!\n'+'<b>'+usernames[(pid+1)%num_players]+'</b> and <b>'+usernames[(pid+3)%num_players]+'</b> WIN :)';
+      if (game_info.has_teams) {
+        if(winner % 2 == pid%2){
+          message = '<b>'+usernames[pid]+'</b> clams successfully!\n'+'<b>'+usernames[pid]+'</b> and <b>'+usernames[(pid+2)%num_players]+'</b> WIN :)';
+        }else{
+          message = '<b>'+usernames[pid]+'</b> clams incorrectly!\n'+'<b>'+usernames[(pid+1)%num_players]+'</b> and <b>'+usernames[(pid+3)%num_players]+'</b> WIN :)';
+        }
+      } else {
+        if (winner == pid) {
+          message = '<b>'+usernames[pid]+'</b> clams successfully!\n'+'<b>'+usernames[pid]+'</b> WINS :)';          
+        } else {
+          message = '<b>'+usernames[pid]+'</b> clams unsuccessfully!\n'+'<b>'+usernames[pid]+'</b> LOSES :(';
+
+        }
       }
       public_gs['history'].push({ message:message });
 
