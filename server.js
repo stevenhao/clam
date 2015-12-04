@@ -301,6 +301,15 @@ module.exports = function(server) {
            || ginfo['num_colors'] <= 0 || ginfo['num_ranks'] <= 0) {
           return 'invalid input';
         }
+        ginfo.num_colors = parseInt(ginfo.num_colors);
+        ginfo.num_players = parseInt(ginfo.num_players);
+        ginfo.num_ranks = parseInt(ginfo.num_ranks);
+        if (ginfo.num_colors != 2) {
+          return 'num colors must be 2 for now';
+        }
+        if (ginfo.num_ranks * 2 % ginfo.num_players) {
+          return 'deck size not multiple of number of players'
+        }
         if (ginfo.has_teams && ginfo.num_players != 4) {
           return 'team games must have 4 players (for now)';
         }
