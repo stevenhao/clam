@@ -588,10 +588,14 @@ module.exports = function(server) {
         socket.emit('clam error', 'invalid view');
         return;
       }
+      
+      if (!(gid in games)) {
+        socket.emit('clam error', 'game is over');
+      }
 
       var error = games[gid].action(pid, 'clam', clamObj);
       if (error != 'ok') {
-        socket.emit('flip error', result.error);
+        socket.emit('clam error', result.error);
       } else {
         for (var skt of games[gid].sockets) {
           skt.emit('clam success');
