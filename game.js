@@ -40,7 +40,6 @@ var Game = function() {
     turn = 0;
     public_gs = {
       history: [{message:'Welcome to Clam!'}],
-      winner: false
     };
 
     private_gs = [];
@@ -230,16 +229,14 @@ var Game = function() {
     },
 
     actionClam = function(pid, clamObj) {
-      var winner = pid;
+      var clammer = pid;
+      var clamSuccess = true;
       for (i = 0; i < num_players; ++i){
         for (j = 0; j < true_cards[i].length; ++j){
           if(clamObj[i][j] != true_cards[i][j]['rank']){
-            winner = -winner;
-            break;
+            clamSuccess = false;
           }
         }
-        if(winner != pid%2)
-          break;
       }
 
       for (i = 0; i < num_players; ++i)
@@ -247,16 +244,17 @@ var Game = function() {
           true_cards[i][j].flipped = true;
 
       phase = 'over';
-      public_gs['winner'] = winner;
+      public_gs['clammer'] = clammer;
+      public_gs['clamSuccess'] = clamSuccess;
       var message = "";
       if (game_info.has_teams) {
-        if(winner % 2 == pid%2){
+        if(clamSuccess){
           message = '<b>'+usernames[pid]+'</b> clams successfully!\n'+'<b>'+usernames[pid]+'</b> and <b>'+usernames[(pid+2)%num_players]+'</b> WIN :)';
         }else{
           message = '<b>'+usernames[pid]+'</b> clams incorrectly!\n'+'<b>'+usernames[(pid+1)%num_players]+'</b> and <b>'+usernames[(pid+3)%num_players]+'</b> WIN :)';
         }
       } else {
-        if (winner == pid) {
+        if (clamSuccess) {
           message = '<b>'+usernames[pid]+'</b> clams successfully!\n'+'<b>'+usernames[pid]+'</b> WINS :)';          
         } else {
           message = '<b>'+usernames[pid]+'</b> clams unsuccessfully!\n'+'<b>'+usernames[pid]+'</b> LOSES :(';

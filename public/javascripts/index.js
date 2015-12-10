@@ -583,7 +583,8 @@ updateObjects = function() {
     var turn = parseInt(gameInfo.public.turn);
     var phase = gameInfo.public.phase;
     var names = gameInfo.usernames;
-    var winner = gameInfo.public.winner;
+    var clammer = gameInfo.public.clammer;
+    var clamSuccess = gameInfo.public.clamSuccess;
     createStatusMessage = function() {
       if (phase == 'pass') {
         var pid = partner(turn);
@@ -597,9 +598,17 @@ updateObjects = function() {
       } else if (phase == 'over') {
         var msg;
         if (gameInfo.game_info.has_teams) {
-          msg = winner % 2 == myPid %2 ? ' win!' : ' lose!';
+          if (clamSuccess > 0) {
+            msg = clammer % 2 == myPid %2 ? ' win!' : ' lose!';
+          } else {
+            msg = clammer % 2 != myPid %2 ? ' win!' : ' lose!';            
+          }
         } else {
-          msg = winner == myPid ? 'win!' : 'lose!';
+          if (clamSuccess > 0) {
+            msg = clammer == myPid ? ' win!' : ' lose!';
+          } else {
+            msg = clammer != myPid ? ' win!' : ' lose!';            
+          }
         }
         return 'Game Over! You '+msg;
       }
