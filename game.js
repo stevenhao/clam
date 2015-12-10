@@ -25,7 +25,7 @@ function generateCards(num_colors, max_rank, num_players) {
 
 var Game = function() {
   var game_info, host, true_cards, phase, turn, public_gs, private_gs, sockets, usernames;
-  var num_players, gid, num_cards;
+  var num_players, gid, num_cards, timestamp;
   var init = function(_game_info, _host) {
     game_info = _game_info;
     host = host;
@@ -56,6 +56,8 @@ var Game = function() {
       }
       private_gs.push(lst);
     }
+
+    timestamp = new Date().getTime() / 1000;
 
     usernames = Utils.fillArray(null, num_players);
 

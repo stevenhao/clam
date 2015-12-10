@@ -63,6 +63,7 @@ var DATABASE = 'clam';
 var users = {};
 
 loadData();
+setInterval(clearOpenGames, 86400000);
 
 function newGameId() {
   var newId = Utils.randomWords(2);
@@ -211,6 +212,17 @@ function bcast(connections, event, args) {
       // connections.remove(user);
     } else {
       user.emit(event, args);
+    }
+  }
+}
+
+function clearOpenGames(){
+  var clearTime = new Date().getTime()/1000 - 86400; // set to 1 day before current time
+  for(var gid in open_games) {
+    var game = open_games.gid;
+    if(game.timestamp < clearTime) {
+      delete open_games.gid;
+      deleteGame('open', gid);
     }
   }
 }
