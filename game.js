@@ -279,6 +279,7 @@ var Game = function() {
       result = actionClam(pid, args);
     }
 
+    print('action, ', {action: _action, result: result});
     if (result == 'ok') {
       updatePublicGS();
       updatePrivateGS();
@@ -337,6 +338,7 @@ var Game = function() {
 
       gid = game_info.gid;
       num_players = game_info.num_players;
+      num_cards = game_info.num_ranks * game_info.num_colors / num_players;
       updatePrivateGS();
       updatePublicGS();
     },
