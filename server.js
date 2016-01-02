@@ -219,9 +219,9 @@ function bcast(connections, event, args) {
 function clearOpenGames(){
   var clearTime = new Date().getTime()/1000 - 86400; // set to 1 day before current time
   for(var gid in open_games) {
-    var game = open_games.gid;
+    var game = open_games[gid];
     if(game.timestamp < clearTime) {
-      delete open_games.gid;
+      delete open_games[gid];
       deleteGame('open', gid);
     }
   }
